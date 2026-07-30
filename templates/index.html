@@ -129,84 +129,114 @@
       white-space: pre-wrap;
     }
 
-    /* Voice button recording state */
-    .mic-btn.recording {
-      background: #fef2f2 !important;
-      border-color: #ef4444 !important;
-      color: #ef4444 !important;
+    /* Responsive Mobile UI */
+    @media (max-width: 640px) {
+      body {
+        padding: 0 !important;
+        background-color: #ffffff !important;
+      }
+      .app-card {
+        height: 100dvh !important;
+        min-height: 100dvh !important;
+        max-width: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      header {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+      }
+      .status-badge-text {
+        font-size: 9px !important;
+      }
+      .chat-bubble-wrapper {
+        max-width: 88% !important;
+      }
+      .glass-footer {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+      }
+      .footer-credits {
+        display: none !important;
+      }
     }
   </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center p-4">
-  <div class="w-full max-w-[600px] h-[90vh] min-h-[600px] flex flex-col bg-white rounded-3xl shadow-2xl shadow-primary/10 overflow-hidden border border-primary-container relative">
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4">
+  <div class="app-card w-full max-w-[600px] h-[100dvh] sm:h-[90vh] min-h-[100dvh] sm:min-h-[600px] flex flex-col bg-white sm:rounded-3xl shadow-2xl shadow-primary/10 overflow-hidden sm:border border-primary-container relative">
 
     <!-- ═══════════════ HEADER ═══════════════ -->
-    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md flex justify-between items-center px-5 py-3.5 border-b border-surface-variant">
-      <div class="flex items-center gap-3">
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md flex justify-between items-center px-4 sm:px-5 py-3 border-b border-surface-variant">
+      <div class="flex items-center gap-2.5">
         <!-- DF Logo -->
-        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-md shadow-primary/30 flex-shrink-0">
-          <span class="text-white font-bold text-sm tracking-wide">DF</span>
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary flex items-center justify-center shadow-md shadow-primary/30 flex-shrink-0">
+          <span class="text-white font-bold text-xs sm:text-sm tracking-wide">DF</span>
         </div>
         <div>
-          <h1 class="font-bold text-[15px] text-on-surface leading-tight">DEVFORGE Support AI</h1>
-          <p class="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">Student Support & Technical AI Agent</p>
+          <h1 class="font-bold text-[14px] sm:text-[15px] text-on-surface leading-tight">DEVFORGE Support AI</h1>
+          <p class="text-[9px] sm:text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">Student Support & Technical AI Agent</p>
         </div>
       </div>
-      <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container rounded-full border border-outline-variant">
+      <div class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-surface-container rounded-full border border-outline-variant">
         <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse flex-shrink-0"></span>
-        <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tight">Ollama Cloud • Gemma4</span>
+        <span class="text-[9px] sm:text-[10px] font-bold text-on-surface-variant uppercase tracking-tight">Ollama • Gemma4</span>
       </div>
     </header>
 
     <!-- ═══════════════ CHAT MESSAGES ═══════════════ -->
-    <main class="flex-1 overflow-y-auto p-5 space-y-4 chat-scroll pb-4" id="chatContainer">
+    <main class="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-4 chat-scroll pb-4" id="chatContainer">
 
       <!-- Welcome bubble -->
-      <div class="bubble-in flex items-start gap-3" style="animation-delay:0.1s">
-        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center border border-outline-variant">
-          <span class="material-symbols-outlined text-tertiary text-[18px]">smart_toy</span>
+      <div class="bubble-in flex items-start gap-2.5 sm:gap-3" style="animation-delay:0.1s">
+        <div class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-secondary-container flex items-center justify-center border border-outline-variant">
+          <span class="material-symbols-outlined text-tertiary text-[16px] sm:text-[18px]">smart_toy</span>
         </div>
-        <div class="flex flex-col items-start max-w-[85%]">
-          <div class="px-4 py-3 bg-white border border-primary-container rounded-2xl rounded-tl-sm shadow-sm">
-            <p class="text-[14px] text-on-surface leading-relaxed">
+        <div class="chat-bubble-wrapper flex flex-col items-start max-w-[88%] sm:max-w-[85%]">
+          <div class="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border border-primary-container rounded-2xl rounded-tl-sm shadow-sm">
+            <p class="text-[13px] sm:text-[14px] text-on-surface leading-relaxed">
               👋 Hello! Welcome to <strong>DEVFORGE Student Support AI Agent</strong>.<br/><br/>
               I can assist you with your <strong>DEVFORGE internships, AI Engineering, Web Dev, Python, FastAPI, LangChain, LangGraph, GitHub, Render deployment</strong> and assignment guidance!
             </p>
           </div>
-          <span class="mt-1.5 px-2.5 py-0.5 bg-primary-container text-[10px] font-bold text-on-primary-container uppercase rounded-full tracking-wide">System Ready</span>
+          <span class="mt-1.5 px-2.5 py-0.5 bg-primary-container text-[9px] sm:text-[10px] font-bold text-on-primary-container uppercase rounded-full tracking-wide">System Ready</span>
         </div>
       </div>
 
     </main>
 
     <!-- ═══════════════ QUICK CHIPS ═══════════════ -->
-    <div class="flex overflow-x-auto gap-2 px-5 py-2.5 chips-row bg-white/60 border-t border-outline-variant/30" id="chipsRow">
-      <button onclick="quickSend('How can I deploy my Python AI agent on Render?')" class="flex-shrink-0 px-3.5 py-1.5 bg-surface-container-low border border-outline-variant text-primary text-[12px] font-semibold rounded-full hover:bg-primary-container transition-all flex items-center gap-1.5">
+    <div class="flex overflow-x-auto gap-2 px-3 sm:px-5 py-2 chips-row bg-white/60 border-t border-outline-variant/30" id="chipsRow">
+      <button onclick="quickSend('How can I deploy my Python AI agent on Render?')" class="flex-shrink-0 px-3 py-1.5 bg-surface-container-low border border-outline-variant text-primary text-[11px] sm:text-[12px] font-semibold rounded-full hover:bg-primary-container transition-all flex items-center gap-1">
         🚀 <span>Deploy on Render</span>
       </button>
-      <button onclick="quickSend('Explain how LangGraph state works in Python')" class="flex-shrink-0 px-3.5 py-1.5 bg-surface-container-low border border-outline-variant text-primary text-[12px] font-semibold rounded-full hover:bg-primary-container transition-all flex items-center gap-1.5">
+      <button onclick="quickSend('Explain how LangGraph state works in Python')" class="flex-shrink-0 px-3 py-1.5 bg-surface-container-low border border-outline-variant text-primary text-[11px] sm:text-[12px] font-semibold rounded-full hover:bg-primary-container transition-all flex items-center gap-1">
         🧠 <span>LangGraph State</span>
       </button>
-      <button onclick="quickSend('How do I get my DEVFORGE internship certificate?')" class="flex-shrink-0 px-3.5 py-1.5 bg-surface-container-low border border-outline-variant text-primary text-[12px] font-semibold rounded-full hover:bg-primary-container transition-all flex items-center gap-1.5">
+      <button onclick="quickSend('How do I get my DEVFORGE internship certificate?')" class="flex-shrink-0 px-3 py-1.5 bg-surface-container-low border border-outline-variant text-primary text-[11px] sm:text-[12px] font-semibold rounded-full hover:bg-primary-container transition-all flex items-center gap-1">
         📜 <span>My Certificate</span>
       </button>
-      <button onclick="quickSend('How to create a FastAPI endpoint with Pydantic?')" class="flex-shrink-0 px-3.5 py-1.5 bg-surface-container-low border border-outline-variant text-primary text-[12px] font-semibold rounded-full hover:bg-primary-container transition-all flex items-center gap-1.5">
+      <button onclick="quickSend('How to create a FastAPI endpoint with Pydantic?')" class="flex-shrink-0 px-3 py-1.5 bg-surface-container-low border border-outline-variant text-primary text-[11px] sm:text-[12px] font-semibold rounded-full hover:bg-primary-container transition-all flex items-center gap-1">
         🐍 <span>FastAPI Help</span>
       </button>
     </div>
 
     <!-- ═══════════════ FOOTER INPUT ═══════════════ -->
-    <footer class="glass-footer border-t border-white/40 px-4 py-3 z-40">
+    <footer class="glass-footer border-t border-white/40 px-3 sm:px-4 py-2.5 sm:py-3 z-40">
       <form id="chatForm" onsubmit="handleSend(event)">
-        <div class="flex items-center gap-2 bg-white/90 rounded-full border border-outline-variant px-2 py-1.5 shadow-sm focus-within:border-primary focus-within:shadow-md focus-within:shadow-primary/10 transition-all">
+        <div class="flex items-center gap-2 bg-white/90 rounded-full border border-outline-variant px-2 py-1 sm:py-1.5 shadow-sm focus-within:border-primary focus-within:shadow-md focus-within:shadow-primary/10 transition-all">
 
           <!-- Voice / Mic Button -->
           <button type="button" id="micBtn"
-            class="pulse-ring mic-btn w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-full border-2 border-primary/20 text-primary hover:bg-primary/5 transition-all"
+            class="pulse-ring mic-btn w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 flex items-center justify-center rounded-full border-2 border-primary/20 text-primary hover:bg-primary/5 transition-all"
             onclick="toggleVoice()"
             title="Voice Input">
-            <span class="material-symbols-outlined text-[20px]" id="micIcon">mic</span>
+            <span class="material-symbols-outlined text-[18px] sm:text-[20px]" id="micIcon">mic</span>
           </button>
 
           <!-- Text Input -->
@@ -214,21 +244,21 @@
             id="userInput"
             type="text"
             autocomplete="off"
-            placeholder="Ask me anything about DEVFORGE..."
-            class="flex-1 bg-transparent border-none outline-none focus:ring-0 text-on-surface text-[14px] placeholder:text-on-surface-variant/50 py-1"
+            placeholder="Ask me anything..."
+            class="flex-1 bg-transparent border-none outline-none focus:ring-0 text-on-surface text-[13px] sm:text-[14px] placeholder:text-on-surface-variant/50 py-1 px-1"
           />
 
           <!-- Send Button -->
           <button
             type="submit"
             id="sendBtn"
-            class="w-9 h-9 flex-shrink-0 bg-primary text-white flex items-center justify-center rounded-full hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/25"
+            class="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 bg-primary text-white flex items-center justify-center rounded-full hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/25"
             title="Send">
-            <span class="material-symbols-outlined text-[20px]">arrow_upward</span>
+            <span class="material-symbols-outlined text-[18px] sm:text-[20px]">arrow_upward</span>
           </button>
         </div>
       </form>
-      <p class="text-center text-[9px] text-on-surface-variant/40 font-medium uppercase tracking-widest mt-2">© 2024 DEVFORGE Systems &nbsp;•&nbsp; Powered by LangGraph + Gemma4</p>
+      <p class="footer-credits text-center text-[9px] text-on-surface-variant/40 font-medium uppercase tracking-widest mt-2">© 2024 DEVFORGE Systems &nbsp;•&nbsp; Powered by LangGraph + Gemma4</p>
     </footer>
 
   </div><!-- end app card -->
