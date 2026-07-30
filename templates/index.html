@@ -243,6 +243,11 @@
 
     let isRecording = false;
     let recognition = null;
+    let isGenerating = false;
+    let currentAbortController = null;
+    let currentTypewriterTimeout = null;
+
+    const sendIcon = document.getElementById('sendIcon') || document.querySelector('#sendBtn .material-symbols-outlined');
 
     // ── Scroll to bottom ──
     function scrollToBottom() {
@@ -263,6 +268,61 @@
       t = t.replace(/\*(.*?)\*/g, '<em>$1</em>');
       t = t.replace(/\n/g, '<br/>');
       return t;
+    }
+
+    // ── Set Generating State ──
+    function setGeneratingState(generating) {
+      isGenerating = generating;
+      const icon = sendBtn.querySelector('.material-symbols-outlined');
+      if (generating) {
+        sendBtn.classList.remove('bg-primary', 'shadow-primary/25');
+        sendBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'shadow-red-600/25');
+        if (icon) icon.textContent = 'square';
+        sendBtn.title = 'Stop Generation';
+        sendBtn.disabled = false;
+      } else {
+        sendBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'shadow-red-600/25');
+        sendBtn.classList.add('bg-primary', 'shadow-primary/25');
+        if (icon) icon.textContent = 'arrow_upward';
+        sendBtn.title = 'Send';
+        sendBtn.disabled = false;
+        userInput.disabled = false;
+        userInput.focus();
+      }
+    }
+
+    // ── Stop Generation ──
+    function stopGeneration() {
+      if (!isGenerating) return;
+
+      if (currentAbortController) {
+        currentAbortController.abort();
+        currentAbortController = null;
+      }
+
+      if (currentTypewriterTimeout) {
+        clearTimeout(currentTypewriterTimeout);
+        currentTypewriterTimeout = null;
+      }
+
+      removeTypingIndicator();
+
+      // Clean cursor if active
+      const cursor = document.getElementById('typeCursor');
+      const textSpan = document.getElementById('typeText');
+      const badge = document.getElementById('aiBadge');
+
+      if (cursor) cursor.remove();
+      if (textSpan) {
+        textSpan.innerHTML += ' <span class="text-[11px] text-red-500 font-semibold italic">[Stopped]</span>';
+        textSpan.removeAttribute('id');
+      }
+      if (badge) {
+        badge.style.display = '';
+        badge.removeAttribute('id');
+      }
+
+      setGeneratingState(false);
     }
 
     // ── Append user message ──
@@ -342,16 +402,19 @@
       const speed = 10;
 
       function typeChar() {
+        if (!isGenerating) return;
+
         if (i < text.length) {
           typeSpan.innerHTML = formatMarkdown(text.slice(0, i + 1));
           i++;
           scrollToBottom();
-          setTimeout(typeChar, speed);
+          currentTypewriterTimeout = setTimeout(typeChar, speed);
         } else {
           cursor.remove();
           badge.style.display = '';
           typeSpan.removeAttribute('id');
           badge.removeAttribute('id');
+          setGeneratingState(false);
         }
       }
       typeChar();
@@ -359,43 +422,58 @@
 
     // ── Quick send ──
     function quickSend(text) {
+      if (isGenerating) return;
       userInput.value = text;
       handleSend(new Event('submit'));
     }
 
-    // ── Handle send ──
+    // ── Handle send / click ──
     async function handleSend(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
+
+      if (isGenerating) {
+        stopGeneration();
+        return;
+      }
+
       const text = userInput.value.trim();
       if (!text) return;
 
       appendUserMessage(text);
       userInput.value = '';
       userInput.disabled = true;
-      sendBtn.disabled = true;
+
+      setGeneratingState(true);
       showTypingIndicator();
 
       // Hide chips after first message
       document.getElementById('chipsRow').style.display = 'none';
 
+      currentAbortController = new AbortController();
+
       try {
         const res = await fetch('/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text })
+          body: JSON.stringify({ message: text }),
+          signal: currentAbortController.signal
         });
         const data = await res.json();
         if (res.ok) {
           appendAssistantMessage(data.reply, data.category);
         } else {
+          removeTypingIndicator();
           appendAssistantMessage(`⚠️ Error: ${data.detail || 'Failed to get response.'}`, 'error');
+          setGeneratingState(false);
         }
       } catch (err) {
-        appendAssistantMessage('⚠️ Connection error — cannot reach the server.', 'error');
-      } finally {
-        userInput.disabled = false;
-        sendBtn.disabled = false;
-        userInput.focus();
+        if (err.name === 'AbortError') {
+          console.log('Fetch request aborted by user.');
+        } else {
+          removeTypingIndicator();
+          appendAssistantMessage('⚠️ Connection error — cannot reach the server.', 'error');
+          setGeneratingState(false);
+        }
       }
     }
 
