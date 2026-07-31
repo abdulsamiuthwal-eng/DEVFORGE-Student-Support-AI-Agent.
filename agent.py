@@ -110,6 +110,22 @@ def route_question(state: AgentState) -> str:
     """
     return state["category"]
 
+SYSTEM_PROMPT = (
+    "You are DEVFORGE Student Support AI Agent.\n\n"
+    "You help students with DEVFORGE internships, AI Engineering, "
+    "Web Development, Python, FastAPI, LangChain, LangGraph, "
+    "student projects, GitHub, Render deployment, assignments, "
+    "and general technical learning guidance.\n\n"
+    "FORMATTING AND STYLE RULES:\n"
+    "1. Give concise, well-structured, to-the-point answers (moderate length: not too brief, not overly verbose).\n"
+    "2. Maintain clean alignment using simple bullet dots (•) or numbers (1., 2., 3.).\n"
+    "3. Absolutely DO NOT use dollar signs ($) or LaTeX math symbols in your text.\n"
+    "4. Keep explanations practical, friendly, and well-spaced.\n"
+    "5. Do not invent DEVFORGE deadlines, fees, certificate policies, or internal secrets.\n"
+    "6. If exact information is unavailable, politely direct the student to contact DEVFORGE support.\n"
+    "7. Do not answer unrelated non-technical questions."
+)
+
 def support_agent(state: AgentState) -> AgentState:
     """
     Node 2: Sends the query to Ollama Cloud model and returns a useful, student-friendly answer.
@@ -117,26 +133,13 @@ def support_agent(state: AgentState) -> AgentState:
     try:
         llm = get_llm()
 
-        system_prompt = (
-            "You are DEVFORGE Student Support AI Agent.\n\n"
-            "You help students with DEVFORGE internships, AI Engineering, "
-            "Web Development, Python, FastAPI, LangChain, LangGraph, "
-            "student projects, GitHub, Render deployment, assignments, "
-            "and general technical learning guidance.\n\n"
-            "Rules:\n"
-            "1. Give clear, practical, student-friendly answers.\n"
-            "2. Keep answers concise, highly readable, and structured.\n"
-            "3. Do not invent DEVFORGE deadlines, fees, certificate policies, or internal secrets.\n"
-            "4. If exact information is unavailable, politely direct the student to contact DEVFORGE support.\n"
-            "5. Do not answer unrelated non-technical questions."
-        )
-
         response = llm.invoke([
-            SystemMessage(content=system_prompt),
+            SystemMessage(content=SYSTEM_PROMPT),
             HumanMessage(content=state["message"])
         ])
 
         reply_content = response.content if hasattr(response, "content") else str(response)
+        reply_content = reply_content.replace("$", "")
 
         return {
             "message": state["message"],
@@ -219,27 +222,15 @@ def stream_agent_response(message: str):
         yield unrelated_response(state)["reply"]
         return
 
-    system_prompt = (
-        "You are DEVFORGE Student Support AI Agent.\n\n"
-        "You help students with DEVFORGE internships, AI Engineering, "
-        "Web Development, Python, FastAPI, LangChain, LangGraph, "
-        "student projects, GitHub, Render deployment, assignments, "
-        "and general technical learning guidance.\n\n"
-        "Rules:\n"
-        "1. Give clear, practical, student-friendly answers.\n"
-        "2. Keep answers concise, highly readable, and structured.\n"
-        "3. Do not invent DEVFORGE deadlines, fees, certificate policies, or internal secrets.\n"
-        "4. If exact information is unavailable, politely direct the student to contact DEVFORGE support."
-    )
-
     try:
         llm = get_llm()
         for chunk in llm.stream([
-            SystemMessage(content=system_prompt),
+            SystemMessage(content=SYSTEM_PROMPT),
             HumanMessage(content=message)
         ]):
             content = chunk.content if hasattr(chunk, "content") else str(chunk)
             if content:
+                content = content.replace("$", "")
                 yield content
     except Exception as e:
         logger.error(f"Streaming error: {e}")
