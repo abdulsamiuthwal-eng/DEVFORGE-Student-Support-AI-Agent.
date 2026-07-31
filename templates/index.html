@@ -851,20 +851,51 @@
 
       currentAbortController = new AbortController();
       try {
-        const res = await fetch('/chat', {
+        const res = await fetch('/chat/stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: text }),
           signal: currentAbortController.signal
         });
-        const data = await res.json();
-        if (res.ok) {
-          appendAI(data.reply);
-        } else {
+
+        if (!res.ok) {
+          const data = await res.json();
           removeTyping();
           appendAI(`⚠️ Error: ${data.detail || 'Something went wrong.'}`);
           setGenerating(false);
+          return;
         }
+
+        removeTyping();
+
+        const row = document.createElement('div');
+        row.className = 'bubble-row ai';
+        row.innerHTML = `
+          <div class="b-avatar">🤖</div>
+          <div>
+            <div class="bubble ai"><span id="typeText"></span></div>
+            <div class="bubble-meta">Just now</div>
+          </div>`;
+        chatContainer.appendChild(row);
+        scrollBottom();
+
+        const typeSpan = document.getElementById('typeText');
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          fullText += chunk;
+          typeSpan.innerHTML = fmtMd(fullText);
+          scrollBottom();
+        }
+
+        typeSpan.removeAttribute('id');
+        setGenerating(false);
+
       } catch (err) {
         if (err.name !== 'AbortError') {
           removeTyping();

@@ -1,11 +1,11 @@
 import os
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from agent import run_agent
+from agent import run_agent, stream_agent_response
 
 app = FastAPI(
     title="DEVFORGE Student Support AI Agent",
@@ -99,4 +99,26 @@ def chat(request: ChatRequest):
         raise HTTPException(
             status_code=500,
             detail=f"Agent execution error: {str(error)}"
+        )
+
+@app.post("/chat/stream")
+def chat_stream(request: ChatRequest):
+    """
+    Real-time streaming endpoint for instant response generation (under 200ms TTFT).
+    """
+    if not request.message or not request.message.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Message cannot be empty."
+        )
+
+    try:
+        return StreamingResponse(
+            stream_agent_response(request.message.strip()),
+            media_type="text/plain"
+        )
+    except Exception as error:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Streaming error: {str(error)}"
         )
