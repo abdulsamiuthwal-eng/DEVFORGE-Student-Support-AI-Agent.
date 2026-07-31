@@ -376,12 +376,16 @@
       filter: drop-shadow(0 10px 20px rgba(139, 92, 246, 0.5));
     }
     .bot-speech-tag {
-      position: absolute; top: -8px; right: -36px; z-index: 2;
+      position: absolute; top: 16px; right: -42px; z-index: 2;
       white-space: nowrap; pointer-events: none;
-      background: rgba(255, 255, 255, 0.95); color: #160c3b;
-      font-size: 10.5px; font-weight: 700;
-      padding: 4px 10px; border-radius: 12px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      color: #ffffff;
+      font-size: 11px; font-weight: 700;
+      padding: 5px 12px; border-radius: 14px;
+      box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.35);
     }
     .chat-welcome-txt { font-size: 15px; font-weight: 700; color: var(--ink); }
     .chat-welcome-sub { font-size: 11px; color: var(--ink-dim); margin-top: 2px; }
