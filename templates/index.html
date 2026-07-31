@@ -264,7 +264,8 @@
     .bubble-row{display:flex;align-items:flex-end;gap:7px;animation:bub-in 0.3s ease forwards;opacity:0;transform:translateY(8px);}
     @keyframes bub-in{to{opacity:1;transform:translateY(0)}}
     .bubble-row.user{flex-direction:row-reverse}
-    .b-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(145deg,#6d28d9,#9333ea);border:1.5px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;box-shadow:0 3px 10px rgba(124,58,237,0.4);}
+    .b-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(145deg,#6d28d9,#9333ea);border:1.5px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;box-shadow:0 3px 12px rgba(124,58,237,0.5);}
+    .u-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(145deg,rgba(255,255,255,0.25),rgba(255,255,255,0.12));border:1.5px solid rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;box-shadow:0 3px 12px rgba(0,0,0,0.25);}
     .bubble{max-width:80%;padding:10px 13px;border-radius:18px;font-size:13px;line-height:1.65;word-break:break-word;}
     .bubble.ai{background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.22);backdrop-filter:blur(20px);color:var(--text-white);border-bottom-left-radius:5px;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
     .bubble.user{background:linear-gradient(135deg,rgba(139,92,246,0.65),rgba(124,58,237,0.55));border:1px solid rgba(168,85,247,0.45);backdrop-filter:blur(20px);color:#fff;border-bottom-right-radius:5px;box-shadow:0 4px 20px rgba(124,58,237,0.35),inset 0 1px 0 rgba(255,255,255,0.15);}
@@ -311,6 +312,18 @@
     .footer-credits{text-align:center;font-size:9px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:8px;}
     @media(max-width:480px){.footer-credits{display:none}}
     .material-symbols-rounded{font-size:18px;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24;line-height:1;}
+
+    /* ── Markdown inside bubbles ── */
+    .md-h1{font-size:15px;font-weight:800;color:#fff;display:block;margin:8px 0 3px;letter-spacing:-0.01em;}
+    .md-h2{font-size:14px;font-weight:700;color:rgba(255,255,255,0.95);display:block;margin:6px 0 3px;}
+    .md-h3{font-size:13px;font-weight:600;color:rgba(255,255,255,0.88);display:block;margin:5px 0 2px;}
+    .md-ul{list-style:none;padding:4px 0;margin:4px 0;display:flex;flex-direction:column;gap:3px;}
+    .md-ul li{position:relative;padding-left:18px;line-height:1.6;}
+    .md-ul li::before{content:'→';position:absolute;left:0;color:#a855f7;font-size:11px;font-weight:700;top:1px;}
+    .md-ol{list-style:none;padding:4px 0;margin:4px 0;display:flex;flex-direction:column;gap:3px;counter-reset:md-c;}
+    .md-ol li{position:relative;padding-left:22px;line-height:1.6;counter-increment:md-c;}
+    .md-ol li::before{content:counter(md-c)'.';position:absolute;left:0;color:#a855f7;font-size:11px;font-weight:700;top:1px;}
+    .md-br{height:5px;display:block;}
   </style>
 </head>
 <body>
@@ -524,14 +537,65 @@
 
     function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    function fmtMd(text){
-      let t=escHtml(text);
-      t=t.replace(/```([\s\S]*?)```/g,'<div class="code-block">$1</div>');
-      t=t.replace(/`([^`]+)`/g,'<code class="inline">$1</code>');
-      t=t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
-      t=t.replace(/\*(.*?)\*/g,'<em>$1</em>');
-      t=t.replace(/\n/g,'<br/>');
+    function inlineFmt(t){
+      t = t.replace(/`([^`]+)`/g,'<code class="inline">$1</code>');
+      t = t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+      t = t.replace(/__(.*?)__/g,'<strong>$1</strong>');
+      t = t.replace(/\*(.*?)\*/g,'<em>$1</em>');
       return t;
+    }
+
+    function fmtMd(raw){
+      // Extract code blocks first
+      const blocks = [];
+      let text = raw.replace(/```[\w]*\n?([\s\S]*?)```/g, (_,c) => { blocks.push(c); return '\x00CB'+(blocks.length-1)+'\x00'; });
+
+      const lines = text.split('\n');
+      let html = '', inUl = false, inOl = false;
+
+      const closeList = () => {
+        if(inUl){ html += '</ul>'; inUl=false; }
+        if(inOl){ html += '</ol>'; inOl=false; }
+      };
+
+      for(let line of lines){
+        // Code block placeholder
+        if(/\x00CB\d+\x00/.test(line)){
+          closeList();
+          html += line.replace(/\x00CB(\d+)\x00/g, (_,i) =>
+            `<div class="code-block">${escHtml(blocks[+i])}</div>`);
+          continue;
+        }
+        // Headings — strip # completely
+        if(/^### /.test(line)){
+          closeList(); html += `<span class="md-h3">${inlineFmt(escHtml(line.slice(4)))}</span>`; continue;
+        }
+        if(/^## /.test(line)){
+          closeList(); html += `<span class="md-h2">${inlineFmt(escHtml(line.slice(3)))}</span>`; continue;
+        }
+        if(/^# /.test(line)){
+          closeList(); html += `<span class="md-h1">${inlineFmt(escHtml(line.slice(2)))}</span>`; continue;
+        }
+        // Unordered list (- or * or +)
+        if(/^[\-\*\+] /.test(line)){
+          if(!inUl){ closeList(); html += '<ul class="md-ul">'; inUl=true; }
+          html += `<li>${inlineFmt(escHtml(line.slice(2)))}</li>`; continue;
+        }
+        // Ordered list (1. 2. etc)
+        if(/^\d+\. /.test(line)){
+          if(!inOl){ closeList(); html += '<ol class="md-ol">'; inOl=true; }
+          html += `<li>${inlineFmt(escHtml(line.replace(/^\d+\.\s*/,'')))}</li>`; continue;
+        }
+        // Empty line
+        if(line.trim() === ''){
+          closeList(); html += '<span class="md-br"></span>'; continue;
+        }
+        // Normal line
+        closeList();
+        html += `<span>${inlineFmt(escHtml(line))}</span><br/>`;
+      }
+      closeList();
+      return html;
     }
 
     function setGen(gen){
@@ -555,7 +619,12 @@
 
     function appendUser(text){
       const row=document.createElement('div'); row.className='bubble-row user';
-      row.innerHTML=`<div><div class="bubble user">${escHtml(text)}</div><div class="bubble-meta" style="text-align:right">You</div></div>`;
+      row.innerHTML=`
+        <div class="u-av">👤</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end">
+          <div class="bubble user">${escHtml(text)}</div>
+          <div class="bubble-meta">You</div>
+        </div>`;
       chatContainer.appendChild(row); scrollBottom();
     }
     function showTyping(){
