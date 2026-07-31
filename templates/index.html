@@ -2,571 +2,621 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>DEVFORGE | Student Support AI Agent</title>
-  <meta name="description" content="DEVFORGE Student Support AI Agent — powered by LangGraph, FastAPI and Ollama Cloud."/>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#5b21b6',
-            'on-primary': '#ffffff',
-            'primary-container': '#ede9fe',
-            'on-primary-container': '#3b0764',
-            secondary: '#6d28d9',
-            'secondary-container': '#ede9fe',
-            'on-secondary-container': '#4c1d95',
-            tertiary: '#7c3aed',
-            'on-tertiary': '#ffffff',
-            'on-tertiary-container': '#5b21b6',
-            surface: '#f8f9fa',
-            'on-surface': '#1c1b1f',
-            'surface-variant': '#e8e0f0',
-            'on-surface-variant': '#49454f',
-            'surface-container': '#f0ebf8',
-            'surface-container-low': '#f7f2ff',
-            'outline-variant': '#cac4d0',
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-        }
-      }
-    }
-  </script>
+  <meta name="description" content="DEVFORGE Student Support AI Agent — powered by LangGraph, FastAPI and Gemma4."/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet"/>
 
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f0ebf8; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Glass footer */
-    .glass-footer {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+    :root {
+      --bg-1: #0e0825;
+      --bg-2: #1a0f3f;
+      --bg-3: #140c35;
+      --purple-a: #7c3aed;
+      --purple-b: #9333ea;
+      --purple-c: #a855f7;
+      --purple-glow: rgba(124,58,237,0.45);
+      --pink-glow:   rgba(236,72,153,0.3);
+      --glass-bg:    rgba(255,255,255,0.06);
+      --glass-border:rgba(255,255,255,0.10);
+      --text-white:  rgba(255,255,255,0.95);
+      --text-soft:   rgba(255,255,255,0.55);
+      --text-muted:  rgba(255,255,255,0.30);
     }
 
-    /* Typing dots */
-    .typing-dot {
-      width: 5px; height: 5px;
-      background-color: #7c3aed;
-      border-radius: 50%;
-      display: inline-block;
-      animation: bounce 1.4s infinite ease-in-out both;
-    }
-    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-    @keyframes bounce {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1.0); }
+    html, body { height: 100%; width: 100%; overflow: hidden; font-family: 'Inter', sans-serif; }
+
+    body {
+      background:
+        radial-gradient(ellipse at 30% 20%, rgba(124,58,237,0.5) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 80%, rgba(147,51,234,0.4) 0%, transparent 50%),
+        radial-gradient(ellipse at 5%  75%, rgba(236,72,153,0.2) 0%, transparent 45%),
+        linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 55%, var(--bg-3) 100%);
+      background-attachment: fixed;
+      display: flex; align-items: center; justify-content: center;
     }
 
-    /* Voice pulse ring */
-    .pulse-ring { position: relative; }
-    .pulse-ring.active::after {
-      content: '';
+    /* ════════ Animated background rings ════════ */
+    .rings-bg {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .ring {
+      position: absolute; border-radius: 50%;
+      border: 1px solid rgba(168,85,247,0.18);
+      animation: ring-pulse 7s ease-in-out infinite;
+    }
+    .ring:nth-child(1){width:200px; height:200px; animation-delay:0s;    border-color:rgba(168,85,247,0.28);}
+    .ring:nth-child(2){width:350px; height:350px; animation-delay:0.9s;  border-color:rgba(168,85,247,0.20);}
+    .ring:nth-child(3){width:500px; height:500px; animation-delay:1.8s;  border-color:rgba(168,85,247,0.14);}
+    .ring:nth-child(4){width:650px; height:650px; animation-delay:2.7s;  border-color:rgba(168,85,247,0.10);}
+    .ring:nth-child(5){width:800px; height:800px; animation-delay:3.6s;  border-color:rgba(168,85,247,0.07);}
+    .ring:nth-child(6){width:960px; height:960px; animation-delay:4.5s;  border-color:rgba(168,85,247,0.04);}
+    @keyframes ring-pulse {
+      0%   { transform: scale(0.7); opacity: 0; }
+      15%  { opacity: 1; }
+      75%  { opacity: 0.6; }
+      100% { transform: scale(1.2); opacity: 0; }
+    }
+
+    /* blobs */
+    .blob { position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0; animation:blob-f 12s ease-in-out infinite; }
+    .blob-1{width:350px;height:350px;background:radial-gradient(circle,rgba(124,58,237,0.5),transparent 70%);top:-80px;left:-80px;animation-delay:0s;}
+    .blob-2{width:280px;height:280px;background:radial-gradient(circle,rgba(236,72,153,0.35),transparent 70%);bottom:-60px;right:-60px;animation-delay:-6s;}
+    .blob-3{width:200px;height:200px;background:radial-gradient(circle,rgba(79,70,229,0.3),transparent 70%);top:45%;right:5%;animation-delay:-3s;}
+    @keyframes blob-f{0%,100%{transform:translateY(0)scale(1)}50%{transform:translateY(-30px)scale(1.07)}}
+
+    /* ════════════════════════════════════════
+       SCREEN 1 — GET STARTED
+    ════════════════════════════════════════ */
+    #getStartedScreen {
+      position: fixed; inset: 0; z-index: 20;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    #getStartedScreen.exit { opacity:0; transform:scale(1.05); pointer-events:none; }
+
+    .gs-card {
+      position: relative; z-index: 1;
+      width: min(360px, 92vw);
+      padding: 36px 28px 32px;
+      border-radius: 36px;
+      background: rgba(255,255,255,0.055);
+      backdrop-filter: blur(32px) saturate(140%);
+      -webkit-backdrop-filter: blur(32px) saturate(140%);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow:
+        0 0 0 1px rgba(168,85,247,0.15),
+        0 40px 90px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+      display: flex; flex-direction: column; align-items: center; gap: 0;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* subtle contour lines behind card */
+    .gs-card::before {
+      content:'';
+      position:absolute; inset:0;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 28px,
+          rgba(168,85,247,0.04) 28px,
+          rgba(168,85,247,0.04) 29px
+        );
+      border-radius:inherit;
+      pointer-events:none;
+    }
+
+    /* ── Robot ── */
+    .robot-wrap {
+      position: relative;
+      width: 160px; height: 160px;
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+    /* robot glow ring (rotating) */
+    .robot-ring {
       position: absolute;
-      width: 100%; height: 100%;
-      top: 0; left: 0;
-      border: 2px solid #5b21b6;
+      inset: -10px;
       border-radius: 50%;
-      animation: pulse-anim 1.5s infinite;
+      border: 1.5px dashed rgba(168,85,247,0.35);
+      animation: rot-cw 10s linear infinite;
     }
-    @keyframes pulse-anim {
-      0% { transform: scale(1); opacity: 0.8; }
-      100% { transform: scale(1.6); opacity: 0; }
+    .robot-ring-2 {
+      position: absolute;
+      inset: -22px;
+      border-radius: 50%;
+      border: 1px dashed rgba(168,85,247,0.18);
+      animation: rot-ccw 14s linear infinite;
+    }
+    @keyframes rot-cw  { from{transform:rotate(0deg)}  to{transform:rotate(360deg)} }
+    @keyframes rot-ccw { from{transform:rotate(0deg)}  to{transform:rotate(-360deg)}}
+
+    .robot-glow {
+      position: absolute;
+      bottom: -10px; left: 50%; transform: translateX(-50%);
+      width: 100px; height: 30px;
+      background: radial-gradient(ellipse, rgba(168,85,247,0.5), transparent 70%);
+      filter: blur(12px);
+      animation: glow-pulse 3s ease-in-out infinite;
+    }
+    @keyframes glow-pulse { 0%,100%{opacity:0.7;transform:translateX(-50%) scale(1)} 50%{opacity:1;transform:translateX(-50%) scale(1.2)} }
+
+    /* SVG robot hover */
+    .robot-svg {
+      width: 160px; height: 160px;
+      animation: robot-float 4s ease-in-out infinite;
+      filter: drop-shadow(0 12px 28px rgba(124,58,237,0.55)) drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+    }
+    @keyframes robot-float {
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-12px)}
     }
 
-    /* Bubble slide-in animation */
-    .bubble-in {
-      animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      opacity: 0;
-      transform: translateY(12px);
+    /* ── Text ── */
+    .gs-version {
+      font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.14em;
+      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
+      color:rgba(255,255,255,0.5); padding:3px 12px; border-radius:20px;
+      margin-bottom:16px;
     }
-    @keyframes slideIn {
-      to { opacity: 1; transform: translateY(0); }
+    .gs-title {
+      font-size: 30px; font-weight: 900; line-height: 1.15;
+      color: var(--text-white);
+      margin-bottom: 10px;
+      text-shadow: 0 2px 20px rgba(168,85,247,0.4);
     }
-
-    /* Typewriter cursor */
-    .type-cursor {
-      display: inline-block;
-      width: 2px; height: 1em;
-      background: #5b21b6;
-      margin-left: 2px;
-      vertical-align: text-bottom;
-      animation: blink 0.7s step-end infinite;
-      border-radius: 1px;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
+    .gs-subtitle {
+      font-size: 13px; color: var(--text-soft); line-height: 1.6;
+      margin-bottom: 28px; font-weight: 400;
     }
 
-    /* Scrollbar */
-    .chat-scroll::-webkit-scrollbar { width: 4px; }
-    .chat-scroll::-webkit-scrollbar-track { background: transparent; }
-    .chat-scroll::-webkit-scrollbar-thumb { background: #cac4d0; border-radius: 10px; }
+    /* ── CTA Button ── */
+    .gs-btn {
+      width: 100%; padding: 15px 0;
+      border-radius: 20px; border: none;
+      background: rgba(255,255,255,0.92);
+      color: #2d1b69;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px; font-weight: 800;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.3), 0 2px 0 rgba(255,255,255,0.5) inset;
+    }
+    .gs-btn:hover  { transform:translateY(-2px); background:#fff; box-shadow:0 10px 36px rgba(168,85,247,0.35),0 2px 0 #fff inset; }
+    .gs-btn:active { transform:translateY(0); }
 
-    /* Chips scrollbar hidden */
-    .chips-row { scrollbar-width: none; }
-    .chips-row::-webkit-scrollbar { display: none; }
-
-    /* Code block inside bubbles */
-    .code-block {
-      background: #1e1e2e;
-      color: #cdd6f4;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      padding: 10px 14px;
-      border-radius: 8px;
-      border-left: 3px solid #5b21b6;
-      margin-top: 8px;
-      white-space: pre-wrap;
+    .gs-tagline {
+      margin-top: 16px;
+      font-size: 11px; color: var(--text-muted);
+      letter-spacing: 0.03em;
     }
 
-    /* Responsive Mobile UI */
-    @media (max-width: 640px) {
-      body {
-        padding: 0 !important;
-        background-color: #ffffff !important;
-      }
-      .app-card {
-        height: 100dvh !important;
-        min-height: 100dvh !important;
-        max-width: 100% !important;
-        border-radius: 0 !important;
-        border: none !important;
-        box-shadow: none !important;
-      }
-      header {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        padding-top: 0.75rem !important;
-        padding-bottom: 0.75rem !important;
-      }
-      .status-badge-text {
-        font-size: 9px !important;
-      }
-      .chat-bubble-wrapper {
-        max-width: 88% !important;
-      }
-      .glass-footer {
-        padding-left: 0.5rem !important;
-        padding-right: 0.5rem !important;
-        padding-top: 0.5rem !important;
-        padding-bottom: 0.5rem !important;
-      }
-      .footer-credits {
-        display: none !important;
-      }
+    /* ════════════════════════════════════════
+       SCREEN 2 — CHAT
+    ════════════════════════════════════════ */
+    #chatScreen {
+      position: fixed; inset: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transform: scale(0.96); pointer-events: none;
+      transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
     }
+    #chatScreen.visible { opacity:1; transform:scale(1); pointer-events:all; }
+
+    .chat-app {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 420px;
+      height: 100dvh; max-height: 860px;
+      display: flex; flex-direction: column;
+      border-radius: 32px; overflow: hidden;
+      background: rgba(255,255,255,0.13);
+      backdrop-filter: blur(50px) saturate(200%) brightness(1.08);
+      -webkit-backdrop-filter: blur(50px) saturate(200%) brightness(1.08);
+      border: 1px solid rgba(255,255,255,0.22);
+      box-shadow:
+        0 0 0 1px rgba(168,85,247,0.18),
+        0 32px 80px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.25),
+        inset 0 0 60px rgba(255,255,255,0.04);
+    }
+
+    @media (max-width: 480px) {
+      body { align-items: stretch; }
+      .chat-app { max-width:100%; height:100dvh; max-height:100dvh; border-radius:0; border:none; }
+    }
+
+    /* header */
+    .chat-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 18px 12px;
+      border-bottom:1px solid rgba(255,255,255,0.15);
+      background:rgba(255,255,255,0.08);
+      flex-shrink:0;
+    }
+    .header-left   { display:flex; align-items:center; gap:10px; }
+    .h-avatar      {
+      width:36px; height:36px; border-radius:50%;
+      background:linear-gradient(145deg,#6d28d9,#9333ea);
+      border:1.5px solid rgba(255,255,255,0.15);
+      display:flex; align-items:center; justify-content:center;
+      font-size:17px; flex-shrink:0;
+      box-shadow: 0 4px 16px rgba(124,58,237,0.5);
+    }
+    .h-name  { font-size:14px; font-weight:700; color:var(--text-white); }
+    .h-sub   { font-size:10px; color:var(--text-muted); font-weight:500; margin-top:1px; }
+    .h-pill  { display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.10); padding:5px 11px; border-radius:20px; }
+    .h-dot   { width:7px; height:7px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px rgba(34,197,94,0.8); animation:dot-blink 2s ease-in-out infinite; }
+    @keyframes dot-blink{0%,100%{opacity:1}50%{opacity:0.4}}
+    .h-label { font-size:9px; font-weight:700; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:0.06em; }
+
+    /* messages */
+    .chat-messages { flex:1; overflow-y:auto; padding:14px 14px 8px; display:flex; flex-direction:column; gap:10px; scroll-behavior:smooth; }
+    .chat-messages::-webkit-scrollbar{width:3px} .chat-messages::-webkit-scrollbar-thumb{background:rgba(168,85,247,0.35);border-radius:10px}
+
+    .bubble-row{display:flex;align-items:flex-end;gap:7px;animation:bub-in 0.3s ease forwards;opacity:0;transform:translateY(8px);}
+    @keyframes bub-in{to{opacity:1;transform:translateY(0)}}
+    .bubble-row.user{flex-direction:row-reverse}
+    .b-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(145deg,#6d28d9,#9333ea);border:1.5px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;box-shadow:0 3px 10px rgba(124,58,237,0.4);}
+    .bubble{max-width:80%;padding:10px 13px;border-radius:18px;font-size:13px;line-height:1.65;word-break:break-word;}
+    .bubble.ai{background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.22);backdrop-filter:blur(20px);color:var(--text-white);border-bottom-left-radius:5px;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
+    .bubble.user{background:linear-gradient(135deg,rgba(124,58,237,0.55),rgba(147,51,234,0.40));border:1px solid rgba(168,85,247,0.3);backdrop-filter:blur(20px);color:var(--text-white);border-bottom-right-radius:5px;box-shadow:0 4px 20px rgba(124,58,237,0.25);}
+    .bubble-meta{font-size:9px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin-top:3px;padding:0 3px;}
+    .bubble-row.user .bubble-meta{text-align:right}
+    .agent-badge{display:inline-block;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.28);color:#c4b5fd;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:2px 8px;border-radius:20px;margin-top:4px;}
+
+    /* typing */
+    .typing-indicator{display:flex;align-items:center;gap:4px;padding:12px 14px;}
+    .typing-dot{width:6px;height:6px;background:rgba(168,85,247,0.7);border-radius:50%;animation:typ 1.4s ease-in-out infinite;}
+    .typing-dot:nth-child(2){animation-delay:0.2s} .typing-dot:nth-child(3){animation-delay:0.4s}
+    @keyframes typ{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-6px);opacity:1}}
+
+    .type-cursor{display:inline-block;width:2px;height:0.85em;background:#a855f7;margin-left:2px;vertical-align:middle;border-radius:1px;animation:cur-blink 0.7s step-end infinite;}
+    @keyframes cur-blink{0%,100%{opacity:1}50%{opacity:0}}
+
+    .code-block{background:rgba(0,0,0,0.35);border:1px solid rgba(168,85,247,0.25);border-left:3px solid var(--purple-a);border-radius:8px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#e9d5ff;margin-top:7px;white-space:pre-wrap;overflow-x:auto;}
+    code.inline{background:rgba(168,85,247,0.18);border:1px solid rgba(168,85,247,0.25);color:#c4b5fd;font-family:'JetBrains Mono',monospace;font-size:11px;padding:1px 5px;border-radius:4px;}
+
+    /* chips */
+    .chips-section{padding:8px 14px 4px;display:flex;gap:7px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+    .chips-section::-webkit-scrollbar{display:none}
+    .chip{flex-shrink:0;background:rgba(255,255,255,0.11);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.80);padding:6px 12px;border-radius:20px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.2s ease;backdrop-filter:blur(12px);}
+    .chip:hover{background:rgba(168,85,247,0.18);border-color:rgba(168,85,247,0.4);color:#e9d5ff;box-shadow:0 0 14px rgba(168,85,247,0.2);}
+
+    /* footer */
+    .chat-footer{padding:8px 12px 20px;border-top:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);flex-shrink:0;}
+    .input-row{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);border-radius:26px;padding:5px 5px 5px 13px;transition:all 0.3s ease;}
+    .input-row:focus-within{border-color:rgba(168,85,247,0.5);box-shadow:0 0 0 3px rgba(168,85,247,0.12),0 0 25px rgba(168,85,247,0.15);background:rgba(255,255,255,0.09);}
+    .chat-input{flex:1;background:transparent;border:none;outline:none;font-family:'Inter',sans-serif;font-size:14px;color:var(--text-white);caret-color:#a855f7;}
+    .chat-input::placeholder{color:var(--text-muted);}
+
+    .mic-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(168,85,247,0.3);background:rgba(168,85,247,0.1);color:rgba(168,85,247,0.9);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s ease;flex-shrink:0;position:relative;}
+    .mic-btn:hover{background:rgba(168,85,247,0.22);border-color:rgba(168,85,247,0.55);}
+    .mic-btn.recording{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.5);color:#f87171;}
+    .mic-btn.active::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:2px solid rgba(168,85,247,0.45);animation:mic-r 1.4s ease-out infinite;}
+    @keyframes mic-r{0%{transform:scale(1);opacity:0.8}100%{transform:scale(1.7);opacity:0}}
+
+    .send-btn{width:36px;height:36px;border-radius:50%;border:none;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s ease;flex-shrink:0;box-shadow:0 4px 16px rgba(124,58,237,0.5);}
+    .send-btn:hover{transform:scale(1.08);box-shadow:0 6px 24px rgba(168,85,247,0.6);}
+    .send-btn:active{transform:scale(0.95);}
+    .send-btn.stop{background:linear-gradient(135deg,#dc2626,#ef4444);box-shadow:0 4px 16px rgba(220,38,38,0.45);}
+
+    .footer-credits{text-align:center;font-size:9px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:8px;}
+    @media(max-width:480px){.footer-credits{display:none}}
+    .material-symbols-rounded{font-size:18px;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24;line-height:1;}
   </style>
 </head>
+<body>
 
-<body class="min-h-screen flex items-center justify-center p-0 sm:p-4">
-  <div class="app-card w-full max-w-[600px] h-[100dvh] sm:h-[90vh] min-h-[100dvh] sm:min-h-[600px] flex flex-col bg-white sm:rounded-3xl shadow-2xl shadow-primary/10 overflow-hidden sm:border border-primary-container relative">
+  <!-- Background rings -->
+  <div class="rings-bg">
+    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+  </div>
 
-    <!-- ═══════════════ HEADER ═══════════════ -->
-    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md flex justify-between items-center px-4 sm:px-5 py-3 border-b border-surface-variant">
-      <div class="flex items-center gap-2.5">
-        <!-- DF Logo -->
-        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary flex items-center justify-center shadow-md shadow-primary/30 flex-shrink-0">
-          <span class="text-white font-bold text-xs sm:text-sm tracking-wide">DF</span>
-        </div>
-        <div>
-          <h1 class="font-bold text-[14px] sm:text-[15px] text-on-surface leading-tight">DEVFORGE Support AI</h1>
-          <p class="text-[9px] sm:text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">Student Support & Technical AI Agent</p>
-        </div>
+  <!-- Blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+
+  <!-- ══════════ SCREEN 1 — GET STARTED ══════════ -->
+  <div id="getStartedScreen">
+    <div class="gs-card">
+
+      <!-- Custom Robot SVG -->
+      <div class="robot-wrap">
+        <div class="robot-ring"></div>
+        <div class="robot-ring-2"></div>
+        <div class="robot-glow"></div>
+
+        <!-- ── SVG Robot Mascot ── -->
+        <svg class="robot-svg" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Shadow under robot -->
+          <ellipse cx="80" cy="148" rx="32" ry="6" fill="rgba(124,58,237,0.35)" filter="url(#sh)"/>
+
+          <!-- Left arm -->
+          <g transform="rotate(-20, 35, 85)">
+            <rect x="22" y="72" width="14" height="28" rx="7" fill="#e8e0ff" stroke="#c4b5fd" stroke-width="1.5"/>
+            <!-- left hand wave -->
+            <circle cx="29" cy="104" r="8" fill="#f0ebff" stroke="#c4b5fd" stroke-width="1.5"/>
+          </g>
+
+          <!-- Right arm (raised/waving) -->
+          <g transform="rotate(20, 125, 75)">
+            <rect x="124" y="60" width="14" height="28" rx="7" fill="#e8e0ff" stroke="#c4b5fd" stroke-width="1.5"/>
+            <!-- right hand -->
+            <circle cx="131" cy="92" r="8" fill="#f0ebff" stroke="#c4b5fd" stroke-width="1.5"/>
+          </g>
+
+          <!-- Body -->
+          <rect x="42" y="78" width="76" height="60" rx="24" fill="url(#bodyGrad)" stroke="#c4b5fd" stroke-width="1.5"/>
+          <!-- body sheen -->
+          <ellipse cx="65" cy="90" rx="14" ry="6" fill="rgba(255,255,255,0.3)" transform="rotate(-15,65,90)"/>
+
+          <!-- Body gem (chest orb) -->
+          <circle cx="80" cy="112" r="9" fill="url(#gemGrad)" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+          <circle cx="77" cy="109" r="3" fill="rgba(255,255,255,0.5)"/>
+
+          <!-- Neck -->
+          <rect x="70" y="68" width="20" height="16" rx="6" fill="#ddd6fe" stroke="#c4b5fd" stroke-width="1.5"/>
+
+          <!-- Head -->
+          <rect x="38" y="28" width="84" height="50" rx="24" fill="url(#headGrad)" stroke="#c4b5fd" stroke-width="1.5"/>
+          <!-- head sheen -->
+          <ellipse cx="60" cy="37" rx="16" ry="7" fill="rgba(255,255,255,0.28)" transform="rotate(-10,60,37)"/>
+
+          <!-- Antenna -->
+          <line x1="80" y1="28" x2="80" y2="14" stroke="#c4b5fd" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="80" cy="11" r="5" fill="url(#antennaGrad)" stroke="#a78bfa" stroke-width="1.5"/>
+          <circle cx="80" cy="11" r="2.5" fill="rgba(255,255,255,0.8)"/>
+
+          <!-- Eyes -->
+          <!-- left eye socket -->
+          <rect x="50" y="42" width="22" height="18" rx="9" fill="#2d1b69" stroke="#4c1d95" stroke-width="1"/>
+          <!-- right eye socket -->
+          <rect x="88" y="42" width="22" height="18" rx="9" fill="#2d1b69" stroke="#4c1d95" stroke-width="1"/>
+          <!-- left pupil glow -->
+          <circle cx="61" cy="51" r="6" fill="url(#eyeGrad)"/>
+          <circle cx="58" cy="48" r="2" fill="rgba(255,255,255,0.7)"/>
+          <!-- right pupil glow -->
+          <circle cx="99" cy="51" r="6" fill="url(#eyeGrad)"/>
+          <circle cx="96" cy="48" r="2" fill="rgba(255,255,255,0.7)"/>
+
+          <!-- Smile -->
+          <path d="M 65 66 Q 80 76 95 66" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+          <!-- Cheek blush left -->
+          <ellipse cx="50" cy="65" rx="7" ry="4" fill="rgba(236,72,153,0.25)"/>
+          <!-- Cheek blush right -->
+          <ellipse cx="110" cy="65" rx="7" ry="4" fill="rgba(236,72,153,0.25)"/>
+
+          <!-- Ear bits -->
+          <rect x="32" y="40" width="10" height="20" rx="5" fill="#ddd6fe" stroke="#c4b5fd" stroke-width="1.5"/>
+          <rect x="118" y="40" width="10" height="20" rx="5" fill="#ddd6fe" stroke="#c4b5fd" stroke-width="1.5"/>
+
+          <!-- defs -->
+          <defs>
+            <filter id="sh"><feGaussianBlur stdDeviation="4"/></filter>
+            <linearGradient id="headGrad" x1="38" y1="28" x2="122" y2="78" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#ede9fe"/>
+              <stop offset="100%" stop-color="#c4b5fd"/>
+            </linearGradient>
+            <linearGradient id="bodyGrad" x1="42" y1="78" x2="118" y2="138" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#ede9fe"/>
+              <stop offset="100%" stop-color="#c4b5fd"/>
+            </linearGradient>
+            <radialGradient id="gemGrad" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#a855f7"/>
+              <stop offset="100%" stop-color="#6d28d9"/>
+            </radialGradient>
+            <radialGradient id="antennaGrad" cx="40%" cy="35%" r="60%">
+              <stop offset="0%" stop-color="#c4b5fd"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </radialGradient>
+            <radialGradient id="eyeGrad" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#a78bfa"/>
+              <stop offset="100%" stop-color="#4c1d95"/>
+            </radialGradient>
+          </defs>
+        </svg>
       </div>
-      <div class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-surface-container rounded-full border border-outline-variant">
-        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse flex-shrink-0"></span>
-        <span class="text-[9px] sm:text-[10px] font-bold text-on-surface-variant uppercase tracking-tight">Ollama • Gemma4</span>
-      </div>
-    </header>
 
-    <!-- ═══════════════ CHAT MESSAGES ═══════════════ -->
-    <main class="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-4 chat-scroll pb-4" id="chatContainer">
+      <div class="gs-version">V 1.0 · DEVFORGE</div>
 
-      <!-- Welcome bubble -->
-      <div class="bubble-in flex items-start gap-2.5 sm:gap-3" style="animation-delay:0.1s">
-        <div class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-secondary-container flex items-center justify-center border border-outline-variant">
-          <span class="material-symbols-outlined text-tertiary text-[16px] sm:text-[18px]">smart_toy</span>
-        </div>
-        <div class="chat-bubble-wrapper flex flex-col items-start max-w-[88%] sm:max-w-[85%]">
-          <div class="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border border-primary-container rounded-2xl rounded-tl-sm shadow-sm">
-            <p class="text-[13px] sm:text-[14px] text-on-surface leading-relaxed">
-              👋 Hello! Welcome to <strong>DEVFORGE Student Support AI Agent</strong>.<br/><br/>
-              I can assist you with your <strong>DEVFORGE internships, AI Engineering, Web Dev, Python, FastAPI, LangChain, LangGraph, GitHub, Render deployment</strong> and assignment guidance!
-            </p>
-          </div>
-          <span class="mt-1.5 px-2.5 py-0.5 bg-primary-container text-[9px] sm:text-[10px] font-bold text-on-primary-container uppercase rounded-full tracking-wide">System Ready</span>
-        </div>
-      </div>
+      <h1 class="gs-title">Welcome to<br/>DEVFORGE AI</h1>
+      <p class="gs-subtitle">Nice to meet you! 👋<br/>How can I help you today?</p>
 
-    </main>
+      <button class="gs-btn" onclick="startChat()">
+        Get Started &nbsp;→
+      </button>
 
-    <!-- ═══════════════ QUICK CHIPS ═══════════════ -->
-    <div class="flex overflow-x-auto gap-2 px-3 sm:px-5 py-2 chips-row bg-white/60 border-t border-outline-variant/30" id="chipsRow">
-      <button onclick="quickSend('How can I deploy my Python AI agent on Render?')" class="flex-shrink-0 px-3 py-1.5 bg-surface-container-low border border-outline-variant text-primary text-[11px] sm:text-[12px] font-semibold rounded-full hover:bg-primary-container transition-all flex items-center gap-1">
-        🚀 <span>Deploy on Render</span>
-      </button>
-      <button onclick="quickSend('Explain how LangGraph state works in Python')" class="flex-shrink-0 px-3 py-1.5 bg-surface-container-low border border-outline-variant text-primary text-[11px] sm:text-[12px] font-semibold rounded-full hover:bg-primary-container transition-all flex items-center gap-1">
-        🧠 <span>LangGraph State</span>
-      </button>
-      <button onclick="quickSend('How do I get my DEVFORGE internship certificate?')" class="flex-shrink-0 px-3 py-1.5 bg-surface-container-low border border-outline-variant text-primary text-[11px] sm:text-[12px] font-semibold rounded-full hover:bg-primary-container transition-all flex items-center gap-1">
-        📜 <span>My Certificate</span>
-      </button>
-      <button onclick="quickSend('How to create a FastAPI endpoint with Pydantic?')" class="flex-shrink-0 px-3 py-1.5 bg-surface-container-low border border-outline-variant text-primary text-[11px] sm:text-[12px] font-semibold rounded-full hover:bg-primary-container transition-all flex items-center gap-1">
-        🐍 <span>FastAPI Help</span>
-      </button>
+      <p class="gs-tagline">Powered by LangGraph · Gemma4 · FastAPI</p>
     </div>
+  </div>
 
-    <!-- ═══════════════ FOOTER INPUT ═══════════════ -->
-    <footer class="glass-footer border-t border-white/40 px-3 sm:px-4 py-2.5 sm:py-3 z-40">
-      <form id="chatForm" onsubmit="handleSend(event)">
-        <div class="flex items-center gap-2 bg-white/90 rounded-full border border-outline-variant px-2 py-1 sm:py-1.5 shadow-sm focus-within:border-primary focus-within:shadow-md focus-within:shadow-primary/10 transition-all">
 
-          <!-- Voice / Mic Button -->
-          <button type="button" id="micBtn"
-            class="pulse-ring mic-btn w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 flex items-center justify-center rounded-full border-2 border-primary/20 text-primary hover:bg-primary/5 transition-all"
-            onclick="toggleVoice()"
-            title="Voice Input">
-            <span class="material-symbols-outlined text-[18px] sm:text-[20px]" id="micIcon">mic</span>
-          </button>
+  <!-- ══════════ SCREEN 2 — CHAT ══════════ -->
+  <div id="chatScreen">
+    <div class="chat-app">
 
-          <!-- Text Input -->
-          <input
-            id="userInput"
-            type="text"
-            autocomplete="off"
-            placeholder="Ask me anything..."
-            class="flex-1 bg-transparent border-none outline-none focus:ring-0 text-on-surface text-[13px] sm:text-[14px] placeholder:text-on-surface-variant/50 py-1 px-1"
-          />
-
-          <!-- Send Button -->
-          <button
-            type="submit"
-            id="sendBtn"
-            class="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 bg-primary text-white flex items-center justify-center rounded-full hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/25"
-            title="Send">
-            <span class="material-symbols-outlined text-[18px] sm:text-[20px]">arrow_upward</span>
-          </button>
+      <header class="chat-header">
+        <div class="header-left">
+          <div class="h-avatar">🤖</div>
+          <div>
+            <div class="h-name">DEVFORGE Support AI</div>
+            <div class="h-sub">Student Technical Agent</div>
+          </div>
         </div>
-      </form>
-      <p class="footer-credits text-center text-[9px] text-on-surface-variant/40 font-medium uppercase tracking-widest mt-2">© 2024 DEVFORGE Systems &nbsp;•&nbsp; Powered by LangGraph + Gemma4</p>
-    </footer>
+        <div class="h-pill">
+          <div class="h-dot"></div>
+          <span class="h-label">Gemma4 Live</span>
+        </div>
+      </header>
 
-  </div><!-- end app card -->
+      <div class="chat-messages" id="chatContainer">
+        <div class="bubble-row ai">
+          <div class="b-av">🤖</div>
+          <div>
+            <div class="bubble ai">
+              👋 Hello! I'm your <strong>DEVFORGE Support AI</strong>.<br/><br/>
+              Ask me about <strong>AI Engineering, FastAPI, LangGraph, Python, GitHub</strong> or your DEVFORGE internship!
+            </div>
+            <div class="bubble-meta">Just now</div>
+            <span class="agent-badge">System Ready</span>
+          </div>
+        </div>
+      </div>
 
-  <!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+      <div class="chips-section" id="chipsRow">
+        <button class="chip" onclick="quickSend('How can I deploy my Python AI agent on Render?')">🚀 Deploy on Render</button>
+        <button class="chip" onclick="quickSend('Explain how LangGraph state works in Python')">🧠 LangGraph State</button>
+        <button class="chip" onclick="quickSend('How do I get my DEVFORGE internship certificate?')">📜 My Certificate</button>
+        <button class="chip" onclick="quickSend('How to create a FastAPI endpoint with Pydantic?')">🐍 FastAPI Help</button>
+      </div>
+
+      <footer class="chat-footer">
+        <form id="chatForm" onsubmit="handleSend(event)">
+          <div class="input-row">
+            <button type="button" class="mic-btn" id="micBtn" onclick="toggleVoice()" title="Voice Input">
+              <span class="material-symbols-rounded" id="micIcon">mic</span>
+            </button>
+            <input class="chat-input" id="userInput" type="text" autocomplete="off" placeholder="Ask me anything…"/>
+            <button type="submit" class="send-btn" id="sendBtn" title="Send">
+              <span class="material-symbols-rounded" id="sendIcon">arrow_upward</span>
+            </button>
+          </div>
+        </form>
+        <div class="footer-credits">© 2024 DEVFORGE Systems · Powered by LangGraph + Gemma4</div>
+      </footer>
+    </div>
+  </div>
+
+
   <script>
-    const chatContainer = document.getElementById('chatContainer');
-    const userInput = document.getElementById('userInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const micBtn = document.getElementById('micBtn');
-    const micIcon = document.getElementById('micIcon');
-
-    let isRecording = false;
-    let recognition = null;
-    let isGenerating = false;
-    let currentAbortController = null;
-    let currentTypewriterTimeout = null;
-
-    const sendIcon = document.getElementById('sendIcon') || document.querySelector('#sendBtn .material-symbols-outlined');
-
-    // ── Scroll to bottom ──
-    function scrollToBottom() {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+    function startChat(){
+      const gs=document.getElementById('getStartedScreen');
+      const cs=document.getElementById('chatScreen');
+      gs.classList.add('exit');
+      cs.classList.add('visible');
+      setTimeout(()=>{ gs.style.display='none'; }, 700);
     }
 
-    // ── Escape HTML ──
-    function escapeHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
+    const chatContainer=document.getElementById('chatContainer');
+    const userInput=document.getElementById('userInput');
+    const sendBtn=document.getElementById('sendBtn');
+    const sendIcon=document.getElementById('sendIcon');
+    const micBtn=document.getElementById('micBtn');
+    const micIcon=document.getElementById('micIcon');
+    const chipsRow=document.getElementById('chipsRow');
 
-    // ── Format markdown (basic) ──
-    function formatMarkdown(text) {
-      let t = escapeHtml(text);
-      t = t.replace(/```([\s\S]*?)```/g, '<div class="code-block">$1</div>');
-      t = t.replace(/`([^`]+)`/g, '<code class="bg-primary-container px-1 rounded text-primary text-[12px] font-mono">$1</code>');
-      t = t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      t = t.replace(/\*(.*?)\*/g, '<em>$1</em>');
-      t = t.replace(/\n/g, '<br/>');
+    let isGenerating=false, isRecording=false;
+    let currentAbortController=null, currentTypewriterTimeout=null;
+
+    function scrollBottom(){ chatContainer.scrollTop=chatContainer.scrollHeight; }
+
+    function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function fmtMd(text){
+      let t=escHtml(text);
+      t=t.replace(/```([\s\S]*?)```/g,'<div class="code-block">$1</div>');
+      t=t.replace(/`([^`]+)`/g,'<code class="inline">$1</code>');
+      t=t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+      t=t.replace(/\*(.*?)\*/g,'<em>$1</em>');
+      t=t.replace(/\n/g,'<br/>');
       return t;
     }
 
-    // ── Set Generating State ──
-    function setGeneratingState(generating) {
-      isGenerating = generating;
-      const icon = sendBtn.querySelector('.material-symbols-outlined');
-      if (generating) {
-        sendBtn.classList.remove('bg-primary', 'shadow-primary/25');
-        sendBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'shadow-red-600/25');
-        if (icon) icon.textContent = 'square';
-        sendBtn.title = 'Stop Generation';
-        sendBtn.disabled = false;
-      } else {
-        sendBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'shadow-red-600/25');
-        sendBtn.classList.add('bg-primary', 'shadow-primary/25');
-        if (icon) icon.textContent = 'arrow_upward';
-        sendBtn.title = 'Send';
-        sendBtn.disabled = false;
-        userInput.disabled = false;
-        userInput.focus();
-      }
+    function setGen(gen){
+      isGenerating=gen;
+      if(gen){ sendBtn.classList.add('stop'); sendIcon.textContent='stop'; userInput.disabled=true; }
+      else   { sendBtn.classList.remove('stop'); sendIcon.textContent='arrow_upward'; userInput.disabled=false; userInput.focus(); }
     }
 
-    // ── Stop Generation ──
-    function stopGeneration() {
-      if (!isGenerating) return;
-
-      if (currentAbortController) {
-        currentAbortController.abort();
-        currentAbortController = null;
-      }
-
-      if (currentTypewriterTimeout) {
-        clearTimeout(currentTypewriterTimeout);
-        currentTypewriterTimeout = null;
-      }
-
-      removeTypingIndicator();
-
-      // Clean cursor if active
-      const cursor = document.getElementById('typeCursor');
-      const textSpan = document.getElementById('typeText');
-      const badge = document.getElementById('aiBadge');
-
-      if (cursor) cursor.remove();
-      if (textSpan) {
-        textSpan.innerHTML += ' <span class="text-[11px] text-red-500 font-semibold italic">[Stopped]</span>';
-        textSpan.removeAttribute('id');
-      }
-      if (badge) {
-        badge.style.display = '';
-        badge.removeAttribute('id');
-      }
-
-      setGeneratingState(false);
+    function stopGeneration(){
+      if(currentAbortController){ currentAbortController.abort(); currentAbortController=null; }
+      if(currentTypewriterTimeout){ clearTimeout(currentTypewriterTimeout); currentTypewriterTimeout=null; }
+      removeTyping();
+      const cur=document.getElementById('typeCursor');
+      const ts=document.getElementById('typeText');
+      const bd=document.getElementById('aiBadge');
+      if(cur) cur.remove();
+      if(ts){ ts.innerHTML+=' <span style="font-size:10px;color:#f87171;font-style:italic">[Stopped]</span>'; ts.removeAttribute('id'); }
+      if(bd){ bd.style.display=''; bd.removeAttribute('id'); }
+      setGen(false);
     }
 
-    // ── Append user message ──
-    function appendUserMessage(text) {
-      const row = document.createElement('div');
-      row.className = 'bubble-in flex items-start flex-row-reverse gap-3';
-      row.innerHTML = `
-        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-white text-[18px]">person</span>
-        </div>
-        <div class="flex flex-col items-end max-w-[85%]">
-          <div class="px-4 py-3 bg-primary text-white rounded-2xl rounded-tr-sm shadow-md shadow-primary/20">
-            <p class="text-[14px] leading-relaxed">${escapeHtml(text)}</p>
-          </div>
-          <span class="mt-1 text-[10px] font-medium text-on-surface-variant uppercase px-1">You</span>
-        </div>
-      `;
-      chatContainer.appendChild(row);
-      scrollToBottom();
+    function appendUser(text){
+      const row=document.createElement('div'); row.className='bubble-row user';
+      row.innerHTML=`<div><div class="bubble user">${escHtml(text)}</div><div class="bubble-meta" style="text-align:right">You</div></div>`;
+      chatContainer.appendChild(row); scrollBottom();
     }
-
-    // ── Show typing indicator ──
-    function showTypingIndicator() {
-      const row = document.createElement('div');
-      row.id = 'typingRow';
-      row.className = 'bubble-in flex items-start gap-3';
-      row.innerHTML = `
-        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center border border-outline-variant">
-          <span class="material-symbols-outlined text-tertiary text-[18px]">smart_toy</span>
-        </div>
-        <div class="px-4 py-3 bg-white border border-primary-container rounded-2xl rounded-tl-sm shadow-sm">
-          <div class="flex items-center gap-1 py-1">
-            <span class="typing-dot"></span>
-            <span class="typing-dot"></span>
-            <span class="typing-dot"></span>
-          </div>
-        </div>
-      `;
-      chatContainer.appendChild(row);
-      scrollToBottom();
+    function showTyping(){
+      const row=document.createElement('div'); row.id='typingRow'; row.className='bubble-row ai';
+      row.innerHTML=`<div class="b-av">🤖</div><div class="bubble ai"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+      chatContainer.appendChild(row); scrollBottom();
     }
+    function removeTyping(){ const t=document.getElementById('typingRow'); if(t) t.remove(); }
 
-    function removeTypingIndicator() {
-      const t = document.getElementById('typingRow');
-      if (t) t.remove();
-    }
-
-    // ── Append AI message with typewriter ──
-    function appendAssistantMessage(text, category) {
-      removeTypingIndicator();
-      const badgeText = category === 'unrelated' ? 'Refusal Fallback' : 'LangGraph Agent';
-
-      const row = document.createElement('div');
-      row.className = 'bubble-in flex items-start gap-3';
-      row.innerHTML = `
-        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center border border-outline-variant">
-          <span class="material-symbols-outlined text-tertiary text-[18px]">smart_toy</span>
-        </div>
-        <div class="flex flex-col items-start max-w-[85%]">
-          <div class="px-4 py-3 bg-white border border-primary-container rounded-2xl rounded-tl-sm shadow-sm" id="aiBubble">
-            <span id="typeText"></span><span class="type-cursor" id="typeCursor"></span>
-          </div>
-          <div style="display:none" id="aiBadge" class="flex items-center gap-2 mt-1.5">
-            <span class="px-2.5 py-0.5 bg-primary-container text-[10px] font-bold text-on-primary-container uppercase rounded-full tracking-wide">${badgeText}</span>
-          </div>
-        </div>
-      `;
-      chatContainer.appendChild(row);
-      scrollToBottom();
-
-      // Typewriter effect
-      const typeSpan = document.getElementById('typeText');
-      const cursor = document.getElementById('typeCursor');
-      const badge = document.getElementById('aiBadge');
-
-      let i = 0;
-      const speed = 10;
-
-      function typeChar() {
-        if (!isGenerating) return;
-
-        if (i < text.length) {
-          typeSpan.innerHTML = formatMarkdown(text.slice(0, i + 1));
-          i++;
-          scrollToBottom();
-          currentTypewriterTimeout = setTimeout(typeChar, speed);
-        } else {
-          cursor.remove();
-          badge.style.display = '';
-          typeSpan.removeAttribute('id');
-          badge.removeAttribute('id');
-          setGeneratingState(false);
-        }
+    function appendAI(text, category){
+      removeTyping();
+      const label=category==='unrelated'?'Off-topic Redirect':'LangGraph Agent';
+      const row=document.createElement('div'); row.className='bubble-row ai';
+      row.innerHTML=`<div class="b-av">🤖</div><div><div class="bubble ai"><span id="typeText"></span><span class="type-cursor" id="typeCursor"></span></div><div class="bubble-meta">Just now</div><span class="agent-badge" id="aiBadge" style="display:none">${label}</span></div>`;
+      chatContainer.appendChild(row); scrollBottom();
+      const tsSpan=document.getElementById('typeText');
+      const cursor=document.getElementById('typeCursor');
+      const badge=document.getElementById('aiBadge');
+      let i=0;
+      function typeChar(){
+        if(!isGenerating) return;
+        if(i<text.length){ tsSpan.innerHTML=fmtMd(text.slice(0,i+1)); i++; scrollBottom(); currentTypewriterTimeout=setTimeout(typeChar,12); }
+        else{ cursor.remove(); badge.style.display=''; tsSpan.removeAttribute('id'); badge.removeAttribute('id'); setGen(false); }
       }
       typeChar();
     }
 
-    // ── Quick send ──
-    function quickSend(text) {
-      if (isGenerating) return;
-      userInput.value = text;
-      handleSend(new Event('submit'));
-    }
+    function quickSend(text){ if(isGenerating) return; userInput.value=text; handleSend(new Event('submit')); }
 
-    // ── Handle send / click ──
-    async function handleSend(e) {
-      if (e) e.preventDefault();
-
-      if (isGenerating) {
-        stopGeneration();
-        return;
-      }
-
-      const text = userInput.value.trim();
-      if (!text) return;
-
-      appendUserMessage(text);
-      userInput.value = '';
-      userInput.disabled = true;
-
-      setGeneratingState(true);
-      showTypingIndicator();
-
-      // Hide chips after first message
-      document.getElementById('chipsRow').style.display = 'none';
-
-      currentAbortController = new AbortController();
-
-      try {
-        const res = await fetch('/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text }),
-          signal: currentAbortController.signal
-        });
-        const data = await res.json();
-        if (res.ok) {
-          appendAssistantMessage(data.reply, data.category);
-        } else {
-          removeTypingIndicator();
-          appendAssistantMessage(`⚠️ Error: ${data.detail || 'Failed to get response.'}`, 'error');
-          setGeneratingState(false);
-        }
-      } catch (err) {
-        if (err.name === 'AbortError') {
-          console.log('Fetch request aborted by user.');
-        } else {
-          removeTypingIndicator();
-          appendAssistantMessage('⚠️ Connection error — cannot reach the server.', 'error');
-          setGeneratingState(false);
-        }
+    async function handleSend(e){
+      if(e) e.preventDefault();
+      if(isGenerating){ stopGeneration(); return; }
+      const text=userInput.value.trim(); if(!text) return;
+      appendUser(text); userInput.value='';
+      setGen(true); showTyping();
+      chipsRow.style.display='none';
+      currentAbortController=new AbortController();
+      try{
+        const res=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text}),signal:currentAbortController.signal});
+        const data=await res.json();
+        if(res.ok){ appendAI(data.reply,data.category); }
+        else{ removeTyping(); appendAI(`⚠️ Error: ${data.detail||'Something went wrong.'}`, 'error'); setGen(false); }
+      }catch(err){
+        if(err.name!=='AbortError'){ removeTyping(); appendAI('⚠️ Cannot reach the server.', 'error'); setGen(false); }
       }
     }
 
-    // ── Voice Input (Web Speech API) ──
-    function toggleVoice() {
-      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert('Voice input is not supported in this browser. Please use Chrome.');
-        return;
-      }
-
-      if (isRecording) {
-        // Stop recording
-        if (recognition) recognition.stop();
-        isRecording = false;
-        micBtn.classList.remove('recording', 'active');
-        micIcon.textContent = 'mic';
-        return;
-      }
-
-      // Start recording
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition = new SpeechRecognition();
-      recognition.lang = 'en-US';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      recognition.onstart = () => {
-        isRecording = true;
-        micBtn.classList.add('recording', 'active');
-        micIcon.textContent = 'mic_off';
-      };
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        userInput.value = transcript;
-        userInput.focus();
-      };
-
-      recognition.onerror = (event) => {
-        console.error('Speech error:', event.error);
-        isRecording = false;
-        micBtn.classList.remove('recording', 'active');
-        micIcon.textContent = 'mic';
-      };
-
-      recognition.onend = () => {
-        isRecording = false;
-        micBtn.classList.remove('recording', 'active');
-        micIcon.textContent = 'mic';
-      };
-
-      recognition.start();
+    function toggleVoice(){
+      if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){ alert('Voice input requires Chrome.'); return; }
+      if(isRecording){ if(window._sr) window._sr.stop(); isRecording=false; micBtn.classList.remove('recording','active'); micIcon.textContent='mic'; return; }
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      const r=new SR(); window._sr=r; r.lang='en-US'; r.interimResults=false;
+      r.onstart=()=>{ isRecording=true; micBtn.classList.add('recording','active'); micIcon.textContent='mic_off'; };
+      r.onresult=e=>{ userInput.value=e.results[0][0].transcript; userInput.focus(); };
+      r.onerror=()=>{ isRecording=false; micBtn.classList.remove('recording','active'); micIcon.textContent='mic'; };
+      r.onend=()=>{ isRecording=false; micBtn.classList.remove('recording','active'); micIcon.textContent='mic'; };
+      r.start();
     }
 
-    // ── Enter key to send ──
-    userInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleSend(e);
-      }
-    });
-
-    scrollToBottom();
+    userInput.addEventListener('keydown', e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); handleSend(e); } });
+    scrollBottom();
   </script>
 </body>
 </html>
