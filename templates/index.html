@@ -152,23 +152,10 @@
       opacity: 0; transform: translateY(20px);
       pointer-events: none;
       transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-      contain: layout style paint;
-      transform: translate3d(0, 0, 0);
     }
     .view-pane.active {
       opacity: 1; transform: translateY(0);
       pointer-events: all;
-    }
-    /* Optimization 1: Auto-Pause Animations on Inactive Screens (GPU Save) */
-    .view-pane:not(.active) * {
-      animation-play-state: paused !important;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
     }
 
     /* ════════════════════════════════════════
@@ -952,10 +939,8 @@
             return;
           }
           if (typedText.length < rawStreamText.length) {
-            // Adaptive real-time step: speeds up smoothly if backlog builds during network bursts
-            const backlog = rawStreamText.length - typedText.length;
-            const step = backlog > 30 ? Math.min(5, Math.ceil(backlog / 6)) : 1;
-            typedText = rawStreamText.slice(0, typedText.length + step);
+            // Type out character by character smoothly
+            typedText = rawStreamText.slice(0, typedText.length + 1);
             typeSpan.innerHTML = fmtMd(typedText);
             scrollBottom();
           } else if (isStreamFinished && typedText.length === rawStreamText.length) {
