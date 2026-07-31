@@ -730,6 +730,7 @@
     let isRecording  = false;
     let currentAbortController = null;
     let currentTypewriterTimeout = null;
+    let currentTypingInterval = null;
 
     function scrollBottom() { chatContainer.scrollTop = chatContainer.scrollHeight; }
 
@@ -797,6 +798,7 @@
     function stopGeneration() {
       if (currentAbortController) { currentAbortController.abort(); currentAbortController = null; }
       if (currentTypewriterTimeout) { clearTimeout(currentTypewriterTimeout); currentTypewriterTimeout = null; }
+      if (currentTypingInterval) { clearInterval(currentTypingInterval); currentTypingInterval = null; }
       removeTyping();
       const typeSpan = document.getElementById('typeText');
       if (typeSpan) {
@@ -918,19 +920,41 @@
         const typeSpan = document.getElementById('typeText');
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
-        let fullText = '';
+
+        let rawStreamText = '';
+        let typedText = '';
+        let isStreamFinished = false;
+
+        if (currentTypingInterval) clearInterval(currentTypingInterval);
+
+        currentTypingInterval = setInterval(() => {
+          if (!isGenerating) {
+            clearInterval(currentTypingInterval);
+            currentTypingInterval = null;
+            return;
+          }
+          if (typedText.length < rawStreamText.length) {
+            // Type out character by character smoothly
+            typedText = rawStreamText.slice(0, typedText.length + 1);
+            typeSpan.innerHTML = fmtMd(typedText);
+            scrollBottom();
+          } else if (isStreamFinished && typedText.length === rawStreamText.length) {
+            clearInterval(currentTypingInterval);
+            currentTypingInterval = null;
+            typeSpan.removeAttribute('id');
+            setGenerating(false);
+          }
+        }, 10);
 
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done) {
+            isStreamFinished = true;
+            break;
+          }
           const chunk = decoder.decode(value, { stream: true });
-          fullText += chunk;
-          typeSpan.innerHTML = fmtMd(fullText);
-          scrollBottom();
+          rawStreamText += chunk;
         }
-
-        typeSpan.removeAttribute('id');
-        setGenerating(false);
 
       } catch (err) {
         if (err.name !== 'AbortError') {
