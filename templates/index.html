@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>DEVFORGE | Student Support AI Agent</title>
   <meta name="description" content="DEVFORGE Student Support AI Agent — Glassmorphic 3D AI Assistant powered by LangGraph, FastAPI, and Gemma4."/>
+  <link rel="preload" href="/static/robot.webp" as="image" type="image/webp"/>
+  <link rel="preload" href="/static/orb.webp" as="image" type="image/webp"/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet"/>
 
@@ -537,7 +539,7 @@
 
         <div class="ob-bot-wrap">
           <div class="ob-bot-glow"></div>
-          <img src="/static/robot.png" class="ob-bot-img" alt="Nova 3D Robot Mascot"/>
+          <img src="/static/robot.webp" class="ob-bot-img" alt="Nova 3D Robot Mascot" fetchpriority="high"/>
         </div>
 
         <p class="ob-subtitle">Nice to meet you! How can I help you?</p>
@@ -572,7 +574,7 @@
         <div class="dash-cards-grid">
           <!-- Voice card -->
           <div class="voice-card" onclick="switchView('viewChat'); startVoice();">
-            <img src="/static/orb.png" class="voice-orb-icon" alt="Voice Orb"/>
+            <img src="/static/orb.webp" class="voice-orb-icon" alt="Voice Orb" fetchpriority="high"/>
             <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:6px;">Uncover new things via Voice Recordings</div>
             <div class="talk-pill">Let's talk</div>
           </div>
@@ -658,7 +660,7 @@
         <!-- 3D Bot mascot header -->
         <div class="chat-bot-header">
           <div class="mini-bot-wrap">
-            <img src="/static/robot.png" class="mini-bot-img" alt="Robot Mascot"/>
+            <img src="/static/robot.webp" class="mini-bot-img" alt="Robot Mascot"/>
             <div class="bot-speech-tag">Hi Student 👋</div>
           </div>
           <div class="chat-welcome-txt">Welcome back</div>
@@ -690,7 +692,7 @@
         <!-- Chat bottom bar with Iridescent Voice Orb -->
         <div class="chat-bottom-bar">
           <button type="button" class="orb-voice-btn" id="orbBtn" onclick="toggleVoice()" title="Voice Mode">
-            <img src="/static/orb.png" class="orb-voice-img" id="orbImg" alt="Voice Orb"/>
+            <img src="/static/orb.webp" class="orb-voice-img" id="orbImg" alt="Voice Orb"/>
           </button>
           
           <form id="chatForm" style="flex:1;" onsubmit="handleSend(event)">
