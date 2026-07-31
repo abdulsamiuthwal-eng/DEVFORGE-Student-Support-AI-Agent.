@@ -398,9 +398,9 @@
     .chat-messages::-webkit-scrollbar { width: 3px; }
     .chat-messages::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
 
-    .bubble-row { display: flex; align-items: flex-end; gap: 8px; opacity: 0; transform: translateY(8px); animation: bub-in 0.3s ease forwards; }
+    .bubble-row { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; opacity: 0; transform: translateY(8px); animation: bub-in 0.3s ease forwards; }
     @keyframes bub-in { to { opacity: 1; transform: translateY(0); } }
-    .bubble-row.user { flex-direction: row-reverse; }
+    .bubble-row.user { flex-direction: row-reverse; margin-left: auto; }
 
     .b-avatar {
       width: 28px; height: 28px; border-radius: 50%;
@@ -419,8 +419,8 @@
     }
 
     .bubble {
-      max-width: 82%; padding: 11px 14px; border-radius: 20px;
-      font-size: 13px; line-height: 1.6; word-break: break-word;
+      max-width: 100%; width: max-content; padding: 11px 14px; border-radius: 20px;
+      font-size: 13px; line-height: 1.5; overflow-wrap: break-word; word-break: normal;
     }
     .bubble.ai {
       background: rgba(255, 255, 255, 0.12);
@@ -818,7 +818,7 @@
       row.className = 'bubble-row user';
       row.innerHTML = `
         <div class="u-avatar">👤</div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;max-width:82%;">
           <div class="bubble user">${escHtml(text)}</div>
           <div class="bubble-meta">You</div>
         </div>`;
