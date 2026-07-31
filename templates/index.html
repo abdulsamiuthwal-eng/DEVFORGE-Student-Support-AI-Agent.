@@ -466,11 +466,13 @@
     .chips-bar::-webkit-scrollbar { display: none; }
     .chip-btn {
       flex-shrink: 0; background: var(--glass-surface); border: 1px solid var(--glass-border);
-      color: var(--ink); padding: 6px 14px; border-radius: 20px; font-size: 11.5px;
+      color: var(--ink); padding: 7px 14px; border-radius: 20px; font-size: 12px;
       font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s ease;
       backdrop-filter: blur(12px);
+      display: inline-flex; align-items: center; gap: 6px;
     }
-    .chip-btn:hover { background: var(--glass-surface-hover); border-color: rgba(255,255,255,0.4); }
+    .chip-btn .material-symbols-rounded { font-size: 15px; line-height: 1; }
+    .chip-btn:hover { background: var(--glass-surface-hover); border-color: rgba(255,255,255,0.4); transform: translateY(-1px); }
 
     /* Chat footer with Iridescent Orb */
     .chat-bottom-bar {
@@ -690,10 +692,42 @@
 
         <!-- Suggestion chips (always visible) -->
         <div class="chips-bar" id="chipsBar">
-          <button class="chip-btn" onclick="quickSend('How can I deploy my Python AI agent on Render?')">🚀 Deploy on Render</button>
-          <button class="chip-btn" onclick="quickSend('Explain how LangGraph state works in Python')">🧠 LangGraph State</button>
-          <button class="chip-btn" onclick="quickSend('How to create a FastAPI endpoint with Pydantic?')">🐍 FastAPI Help</button>
-          <button class="chip-btn" onclick="quickSend('How do I get my DEVFORGE internship certificate?')">📜 Certificate</button>
+          <button class="chip-btn" onclick="quickSend('AI Engineering')">
+            <span class="material-symbols-rounded" style="color:#c4b5fd;">psychology</span>
+            <span>AI Engineering</span>
+          </button>
+          <button class="chip-btn" onclick="quickSend('Web Development')">
+            <span class="material-symbols-rounded" style="color:#60a5fa;">code</span>
+            <span>Web Development</span>
+          </button>
+          <button class="chip-btn" onclick="quickSend('Python')">
+            <span class="material-symbols-rounded" style="color:#4ade80;">terminal</span>
+            <span>Python</span>
+          </button>
+          <button class="chip-btn" onclick="quickSend('FastAPI')">
+            <span class="material-symbols-rounded" style="color:#facc15;">bolt</span>
+            <span>FastAPI</span>
+          </button>
+          <button class="chip-btn" onclick="quickSend('LangChain')">
+            <span class="material-symbols-rounded" style="color:#a78bfa;">hub</span>
+            <span>LangChain</span>
+          </button>
+          <button class="chip-btn" onclick="quickSend('GitHub Render deployment')">
+            <span class="material-symbols-rounded" style="color:#f472b6;">rocket_launch</span>
+            <span>GitHub Render deployment</span>
+          </button>
+          <button class="chip-btn" onclick="quickSend('Student assignments')">
+            <span class="material-symbols-rounded" style="color:#fbbf24;">assignment</span>
+            <span>Student assignments</span>
+          </button>
+          <button class="chip-btn" onclick="quickSend('Project guidance')">
+            <span class="material-symbols-rounded" style="color:#38bdf8;">lightbulb</span>
+            <span>Project guidance</span>
+          </button>
+          <button class="chip-btn" onclick="quickSend('DEVFORGE internship learning support')">
+            <span class="material-symbols-rounded" style="color:#34d399;">school</span>
+            <span>DEVFORGE internship learning support</span>
+          </button>
         </div>
 
         <!-- Chat bottom bar with Iridescent Voice Orb -->
