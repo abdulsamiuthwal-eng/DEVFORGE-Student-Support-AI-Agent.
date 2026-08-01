@@ -1171,14 +1171,20 @@
       }
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       const r = new SR(); window._sr = r;
-      r.lang = 'en-US'; r.interimResults = false;
+      r.lang = 'en-US';
+      r.interimResults = true;
+      r.continuous = true;
+
       r.onstart = () => {
         isRecording = true;
         orbImg.style.boxShadow = '0 0 35px rgba(239, 68, 68, 0.9)';
       };
       r.onresult = (e) => {
-        userInput.value = e.results[0][0].transcript;
-        userInput.focus();
+        let transcript = '';
+        for (let i = 0; i < e.results.length; i++) {
+          transcript += e.results[i][0].transcript;
+        }
+        userInput.value = transcript;
       };
       r.onerror = () => {
         isRecording = false;
