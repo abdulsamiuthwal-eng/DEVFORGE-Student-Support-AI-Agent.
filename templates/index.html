@@ -197,13 +197,46 @@
       filter: blur(35px);
       animation: bot-glow-pulse 3.5s ease-in-out infinite;
     }
-    .ob-bot-img {
+    /* Mascot Skeleton Shimmer Loader */
+    .bot-skeleton-loader {
+      position: absolute;
+      inset: 25px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(168, 85, 247, 0.25) 50%, rgba(255, 255, 255, 0.04) 100%);
+      background-size: 200% 100%;
+      animation: bot-skeleton-shimmer 1.8s ease-in-out infinite;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+      z-index: 0;
+      opacity: 1;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .bot-skeleton-loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.9);
+    }
+    @keyframes bot-skeleton-shimmer {
+      0%   { background-position: -200% 0; transform: scale(0.96); }
+      50%  { background-position: 200% 0; transform: scale(1.02); }
+      100% { background-position: -200% 0; transform: scale(0.96); }
+    }
+
+    .ob-bot-img, .mini-bot-img {
       position: relative; z-index: 1;
       width: 100%; height: 100%;
       object-fit: contain;
       filter: drop-shadow(0 20px 35px rgba(124, 58, 237, 0.6));
       animation: float-mascot 4s ease-in-out infinite;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
     }
+    .ob-bot-img.img-loaded, .mini-bot-img.img-loaded {
+      opacity: 1;
+    }
+
     @keyframes float-mascot {
       0%, 100% { transform: translateY(-8px); }
       50%      { transform: translateY(8px); }
@@ -607,7 +640,8 @@
 
         <div class="ob-bot-wrap">
           <div class="ob-bot-glow"></div>
-          <img src="/static/robot.webp" class="ob-bot-img" alt="Nova 3D Robot Mascot" fetchpriority="high"/>
+          <div class="bot-skeleton-loader" id="obBotSkeleton"></div>
+          <img src="/static/robot.webp" class="ob-bot-img" id="obBotImg" alt="Nova 3D Robot Mascot" fetchpriority="high" onload="onRobotLoaded('obBotImg', 'obBotSkeleton')"/>
         </div>
 
         <p class="ob-subtitle">Nice to meet you! How can I help you?</p>
@@ -730,7 +764,8 @@
           <!-- 3D Bot mascot header -->
           <div class="chat-bot-header">
             <div class="mini-bot-wrap">
-              <img src="/static/robot.webp" class="mini-bot-img" alt="Robot Mascot"/>
+              <div class="bot-skeleton-loader" id="miniBotSkeleton" style="inset:5px;"></div>
+              <img src="/static/robot.webp" class="mini-bot-img" id="miniBotImg" alt="Robot Mascot" onload="onRobotLoaded('miniBotImg', 'miniBotSkeleton')"/>
               <div class="bot-speech-tag">Hi Student 👋</div>
             </div>
             <div class="chat-welcome-txt">Welcome back</div>
@@ -824,6 +859,25 @@
       const target = document.getElementById(viewId);
       if (target) target.classList.add('active');
     }
+
+    /* Robot Mascot Image Skeleton & Fade-In Handler */
+    function onRobotLoaded(imgId, skelId) {
+      const img = document.getElementById(imgId);
+      const skel = document.getElementById(skelId);
+      if (img) img.classList.add('img-loaded');
+      if (skel) skel.classList.add('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      ['obBotImg', 'miniBotImg'].forEach(id => {
+        const img = document.getElementById(id);
+        const skel = document.getElementById(id === 'obBotImg' ? 'obBotSkeleton' : 'miniBotSkeleton');
+        if (img && (img.complete || img.naturalWidth > 0)) {
+          img.classList.add('img-loaded');
+          if (skel) skel.classList.add('hidden');
+        }
+      });
+    });
 
     const chatContainer   = document.getElementById('chatContainer');
     const userInput       = document.getElementById('userInput');
