@@ -838,6 +838,7 @@
     let currentAbortController = null;
     let currentTypewriterTimeout = null;
     let animFrameId = null;
+    let btnHideTimeout = null;
 
     // Instant gesture detach & scroll detection
     function updateScrollState() {
@@ -873,10 +874,18 @@
     });
 
     function showScrollBottomBtn() {
-      if (scrollBottomBtn) scrollBottomBtn.classList.add('visible');
+      if (scrollBottomBtn) {
+        scrollBottomBtn.classList.add('visible');
+        if (btnHideTimeout) clearTimeout(btnHideTimeout);
+        // Automatically hide the scroll down button after 4 seconds as requested
+        btnHideTimeout = setTimeout(() => {
+          hideScrollBottomBtn();
+        }, 4000);
+      }
     }
 
     function hideScrollBottomBtn() {
+      if (btnHideTimeout) { clearTimeout(btnHideTimeout); btnHideTimeout = null; }
       if (scrollBottomBtn) scrollBottomBtn.classList.remove('visible');
     }
 
@@ -1108,7 +1117,7 @@
             return;
           }
           if (typedText.length < rawStreamText.length) {
-            const step = Math.max(1, Math.floor((rawStreamText.length - typedText.length) / 3));
+            const step = Math.min(2, Math.max(1, Math.floor((rawStreamText.length - typedText.length) / 6)));
             typedText = rawStreamText.slice(0, typedText.length + step);
             typeSpan.innerHTML = fmtMd(typedText);
             scrollBottom(false);

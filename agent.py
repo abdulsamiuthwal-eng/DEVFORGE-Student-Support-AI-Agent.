@@ -44,7 +44,7 @@ def get_llm():
         model=model_name,
         base_url="https://ollama.com",
         temperature=0.3,
-        num_predict=350,
+        num_predict=220,
         client_kwargs={
             "headers": {
                 "Authorization": f"Bearer {api_key}"
@@ -117,10 +117,10 @@ SYSTEM_PROMPT = (
     "student projects, GitHub, Render deployment, assignments, "
     "and general technical learning guidance.\n\n"
     "FORMATTING AND STYLE RULES:\n"
-    "1. Give concise, well-structured, to-the-point answers (moderate length: not too brief, not overly verbose).\n"
+    "1. Keep answers short, concise, and direct (2-4 bullet points or short paragraphs). Avoid long verbose responses.\n"
     "2. Maintain clean alignment using simple bullet dots (•) or numbers (1., 2., 3.).\n"
     "3. Absolutely DO NOT use dollar signs ($) or LaTeX math symbols in your text.\n"
-    "4. Keep explanations practical, friendly, and well-spaced.\n"
+    "4. Keep explanations practical, clear, friendly, and to the point.\n"
     "5. Do not invent DEVFORGE deadlines, fees, certificate policies, or internal secrets.\n"
     "6. If exact information is unavailable, politely direct the student to contact DEVFORGE support.\n"
     "7. Do not answer unrelated non-technical questions."
