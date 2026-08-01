@@ -349,7 +349,7 @@
     /* ════════════════════════════════════════
        SCREEN 3: INTERACTIVE CHAT & VOICE MODE
     ════════════════════════════════════════ */
-    .scr-chat { display: flex; flex-direction: column; height: 100%; }
+    .scr-chat { display: flex; flex-direction: column; height: 100%; position: relative; }
 
     .chat-top-bar {
       padding: 16px; display: flex; align-items: center; justify-content: space-between;
@@ -393,13 +393,51 @@
     .chat-messages {
       flex: 1; overflow-y: auto; padding: 12px 16px;
       display: flex; flex-direction: column; gap: 10px;
-      scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
       will-change: scroll-position;
     }
     .chat-messages::-webkit-scrollbar { width: 3px; }
     .chat-messages::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+
+    /* Floating Scroll to Bottom Button (Transparent Glassmorphism centered above bottom bar) */
+    .scroll-bottom-btn {
+      position: absolute;
+      bottom: 115px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      z-index: 25;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
+    }
+    .scroll-bottom-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .scroll-bottom-btn:hover {
+      background: rgba(139, 92, 246, 0.65);
+      border-color: rgba(255, 255, 255, 0.6);
+      transform: translateX(-50%) translateY(-2px);
+      box-shadow: 0 12px 30px rgba(139, 92, 246, 0.55);
+    }
+    .scroll-bottom-btn:active {
+      transform: translateX(-50%) translateY(0) scale(0.95);
+    }
 
     .bubble-row { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 4px; opacity: 0; transform: translateY(8px); animation: bub-in 0.3s ease forwards; }
     @keyframes bub-in { to { opacity: 1; transform: translateY(0); } }
@@ -697,6 +735,11 @@
           </div>
         </div>
 
+        <!-- Floating Scroll to Bottom Button (ChatGPT-style) -->
+        <button class="scroll-bottom-btn" id="scrollBottomBtn" onclick="scrollToBottomManual()" title="Scroll to bottom">
+          <span class="material-symbols-rounded" style="font-size:20px;">arrow_downward</span>
+        </button>
+
         <!-- Suggestion chips (always visible) -->
         <div class="chips-bar" id="chipsBar">
           <button class="chip-btn" onclick="quickSend('AI Engineering')">
@@ -768,30 +811,74 @@
       if (target) target.classList.add('active');
     }
 
-    const chatContainer = document.getElementById('chatContainer');
-    const userInput     = document.getElementById('userInput');
-    const submitBtn     = document.getElementById('submitBtn');
-    const sendIcon      = document.getElementById('sendIcon');
-    const orbImg        = document.getElementById('orbImg');
+    const chatContainer   = document.getElementById('chatContainer');
+    const userInput       = document.getElementById('userInput');
+    const submitBtn       = document.getElementById('submitBtn');
+    const sendIcon        = document.getElementById('sendIcon');
+    const orbImg          = document.getElementById('orbImg');
+    const scrollBottomBtn = document.getElementById('scrollBottomBtn');
 
     let isGenerating = false;
     let isRecording  = false;
-    let isUserScrolledUp = false;
+    let isPinnedToBottom = true;
     let currentAbortController = null;
     let currentTypewriterTimeout = null;
-    let currentTypingInterval = null;
+    let animFrameId = null;
 
-    // Smart scroll listener: track whether user has manually scrolled up
-    chatContainer.addEventListener('scroll', () => {
+    // Instant gesture detach & scroll detection
+    function updateScrollState() {
+      const threshold = 35; // px from bottom
       const distanceFromBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight;
-      isUserScrolledUp = distanceFromBottom > 60;
+      if (distanceFromBottom > threshold) {
+        if (isPinnedToBottom) {
+          isPinnedToBottom = false;
+          showScrollBottomBtn();
+        }
+      } else {
+        if (!isPinnedToBottom) {
+          isPinnedToBottom = true;
+          hideScrollBottomBtn();
+        }
+      }
+    }
+
+    // Instant detach on user wheel/touch gesture
+    chatContainer.addEventListener('wheel', (e) => {
+      if (e.deltaY < 0) { // user scrolling up
+        isPinnedToBottom = false;
+        showScrollBottomBtn();
+      }
+    }, { passive: true });
+
+    chatContainer.addEventListener('touchmove', () => {
+      updateScrollState();
+    }, { passive: true });
+
+    chatContainer.addEventListener('scroll', () => {
+      updateScrollState();
     });
+
+    function showScrollBottomBtn() {
+      if (scrollBottomBtn) scrollBottomBtn.classList.add('visible');
+    }
+
+    function hideScrollBottomBtn() {
+      if (scrollBottomBtn) scrollBottomBtn.classList.remove('visible');
+    }
+
+    function scrollToBottomManual() {
+      isPinnedToBottom = true;
+      hideScrollBottomBtn();
+      chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+    }
 
     function scrollBottom(force = false) {
       if (force) {
-        isUserScrolledUp = false;
+        isPinnedToBottom = true;
+        hideScrollBottomBtn();
         chatContainer.scrollTop = chatContainer.scrollHeight;
-      } else if (!isUserScrolledUp) {
+      } else if (isPinnedToBottom) {
+        // Instant scroll without smooth behavior so text flows naturally downwards without sliding up
         chatContainer.scrollTop = chatContainer.scrollHeight;
       }
     }
@@ -864,7 +951,7 @@
     function stopGeneration() {
       if (currentAbortController) { currentAbortController.abort(); currentAbortController = null; }
       if (currentTypewriterTimeout) { clearTimeout(currentTypewriterTimeout); currentTypewriterTimeout = null; }
-      if (currentTypingInterval) { clearInterval(currentTypingInterval); currentTypingInterval = null; }
+      if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
       removeTyping();
       const typeSpan = document.getElementById('typeText');
       if (typeSpan) {
@@ -916,7 +1003,7 @@
           <div class="bubble-meta">Just now</div>
         </div>`;
       chatContainer.appendChild(row);
-      scrollBottom();
+      scrollBottom(true);
 
       const typeSpan = document.getElementById('typeText');
       let i = 0;
@@ -925,7 +1012,7 @@
         if (i < text.length) {
           typeSpan.innerHTML = fmtMd(text.slice(0, i + 1));
           i++;
-          scrollBottom();
+          scrollBottom(false);
           currentTypewriterTimeout = setTimeout(typeChar, 12);
         } else {
           typeSpan.removeAttribute('id');
@@ -981,7 +1068,7 @@
             <div class="bubble-meta">Just now</div>
           </div>`;
         chatContainer.appendChild(row);
-        scrollBottom();
+        scrollBottom(true);
 
         const typeSpan = document.getElementById('typeText');
         const reader = res.body.getReader();
@@ -991,26 +1078,30 @@
         let typedText = '';
         let isStreamFinished = false;
 
-        if (currentTypingInterval) clearInterval(currentTypingInterval);
+        if (animFrameId) cancelAnimationFrame(animFrameId);
 
-        currentTypingInterval = setInterval(() => {
+        function renderFrame() {
           if (!isGenerating) {
-            clearInterval(currentTypingInterval);
-            currentTypingInterval = null;
+            animFrameId = null;
             return;
           }
           if (typedText.length < rawStreamText.length) {
-            // Type out character by character smoothly
-            typedText = rawStreamText.slice(0, typedText.length + 1);
+            const step = Math.max(1, Math.floor((rawStreamText.length - typedText.length) / 3));
+            typedText = rawStreamText.slice(0, typedText.length + step);
             typeSpan.innerHTML = fmtMd(typedText);
-            scrollBottom();
+            scrollBottom(false);
+            animFrameId = requestAnimationFrame(renderFrame);
           } else if (isStreamFinished && typedText.length === rawStreamText.length) {
-            clearInterval(currentTypingInterval);
-            currentTypingInterval = null;
+            animFrameId = null;
             typeSpan.removeAttribute('id');
             setGenerating(false);
+            scrollBottom(false);
+          } else {
+            animFrameId = requestAnimationFrame(renderFrame);
           }
-        }, 10);
+        }
+
+        animFrameId = requestAnimationFrame(renderFrame);
 
         while (true) {
           const { done, value } = await reader.read();
