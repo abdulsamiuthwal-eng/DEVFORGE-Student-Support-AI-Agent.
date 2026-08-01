@@ -34,7 +34,7 @@ if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 class ChatRequest(BaseModel):
-    message: str = Field(..., example="How can I deploy my Python AI agent on Render?")
+    message: str = Field(..., examples=["How can I deploy my Python AI agent on Render?"])
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
